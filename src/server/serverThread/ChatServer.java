@@ -19,7 +19,6 @@ public class ChatServer extends Thread {
         ServerSocket chatServerSocket = null;
 
         try{
-
             chatServerSocket = new ServerSocket(10005);
 
             while(true) {

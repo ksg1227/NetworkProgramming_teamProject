@@ -31,9 +31,17 @@ public class StatisticHandler extends Thread {
 
             onStatisticClients.put(userName, pw);
 
-            System.out.println(userName + "님이 일정 조율 기능을 사용하셨습니다.");
+            System.out.println(userName + "님이 일정 확인 기능을 사용하셨습니다.");
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                if(br != null) br.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            if(pw != null) pw.close();
         }
     }
 }
