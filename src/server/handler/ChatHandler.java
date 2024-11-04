@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Collection;
 import java.util.Map;
 
 public class ChatHandler extends Thread {
@@ -13,7 +14,7 @@ public class ChatHandler extends Thread {
     Map<String, PrintWriter> onChatClients;
 
 
-    public ChatHandler(Socket socket, Map<String, PrintWriter> onChatClients){
+    public ChatHandler(Socket socket, Map<String, PrintWriter> onChatClients) {
         this.socket = socket;
         this.onChatClients = onChatClients;
     }
@@ -23,7 +24,7 @@ public class ChatHandler extends Thread {
         PrintWriter pw = null;
         BufferedReader br = null;
 
-        try{
+        try {
             br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             pw = new PrintWriter(socket.getOutputStream(), true);
 
@@ -31,9 +32,30 @@ public class ChatHandler extends Thread {
 
             onChatClients.put(userName, pw);
 
-            System.out.println(userName + "님이 일정 조율 기능을 사용하셨습니다.");
+            System.out.println(userName + "님이 채팅 기능을 사용하셨습니다.");
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                if (br != null) br.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (pw != null) pw.close();
         }
     }
+
+
+    public void broadcast(String message) {
+
+        synchronized (onChatClients) {
+            Collection<PrintWriter> collection = onChatClients.values();
+            for (PrintWriter pw : collection) {
+                pw.println(message);
+                pw.flush();
+            }
+        }
+    }
+
 }

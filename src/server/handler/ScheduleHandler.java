@@ -9,24 +9,21 @@ import java.util.Map;
 
 public class ScheduleHandler extends Thread {
 
-    Socket socket;
+    BufferedReader br;
+    PrintWriter pw;
     Map<String, PrintWriter> onScheduleClients;
 
 
-    public ScheduleHandler(Socket socket, Map<String, PrintWriter> onScheduleClients){
-        this.socket = socket;
+    public ScheduleHandler(BufferedReader br, PrintWriter pw, Map<String, PrintWriter> onScheduleClients){
+        this.br = br;
+        this.pw = pw;
         this.onScheduleClients = onScheduleClients;
     }
 
     @Override
     public void run() {
-        PrintWriter pw = null;
-        BufferedReader br = null;
 
         try{
-            br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            pw = new PrintWriter(socket.getOutputStream(), true);
-
             String userName = br.readLine();
 
             onScheduleClients.put(userName, pw);
@@ -34,6 +31,14 @@ public class ScheduleHandler extends Thread {
             System.out.println(userName + "님이 날짜 조율 기능을 사용하셨습니다.");
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                if(br != null) br.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            if(pw != null) pw.close();
         }
     }
 }

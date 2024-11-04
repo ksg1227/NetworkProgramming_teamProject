@@ -1,9 +1,6 @@
 package client;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 import static client.ClientOrderGenerator.*;
@@ -60,6 +57,9 @@ public class Client {
                             br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
                             pw = new PrintWriter(sock.getOutputStream(), true);
 
+                            // ScheduleServer로 호스트 여부와 클라이언트의 이름을 전송
+                            // 반드시 순서가 지켜져야합니다!
+                            pw.println(isHost);
                             pw.println(name);
 
                             if (isHost) { // 호스트 클라이언트가 수행할 코드 영역 : 호스트 클라이언트는 시작일, 종료일을 설정해야함
@@ -122,6 +122,9 @@ public class Client {
                             br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
                             pw = new PrintWriter(sock.getOutputStream(), true);
 
+                            // VoteServer로 호스트 여부와 클라이언트의 이름을 전송
+                            // 반드시 순서가 지켜져야합니다!
+                            pw.println(isHost);
                             pw.println(name);
 
 
@@ -130,7 +133,6 @@ public class Client {
                             }
 
                             if (!isHost) { // 일반 클라이언트가 수행할 코드 영역 : 일반 클라이언트는 오직 투표만 수행
-
                             }
 
 
