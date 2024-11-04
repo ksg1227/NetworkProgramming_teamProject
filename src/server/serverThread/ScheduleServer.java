@@ -1,7 +1,8 @@
 package server.serverThread;
 
-import server.handler.ChatHandler;
-import server.handler.ScheduleHandler;
+import server.handler.host.HostScheduleHandler;
+import server.handler.host.HostVoteHandler;
+import server.handler.normal.ScheduleHandler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,8 +35,10 @@ public class ScheduleServer extends Thread{
                 boolean isHost = Boolean.parseBoolean(br.readLine());
 
                 if(isHost) {
-                    String hostName = br.readLine();
-                    System.out.println("호스트 : " + hostName + "가 날짜 조율 기능에...?");
+//                    String hostName = br.readLine();
+//                    System.out.println("호스트 : " + hostName + "가 날짜 조율 기능에...?");
+                    HostScheduleHandler hostScheduleHandler = new HostScheduleHandler(br, pw, onScheduleClients);
+                    hostScheduleHandler.start();
                     continue;
                 }
 

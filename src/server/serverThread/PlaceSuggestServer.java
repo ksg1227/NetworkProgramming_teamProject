@@ -1,7 +1,6 @@
 package server.serverThread;
 
-import server.handler.ChatHandler;
-import server.handler.PlaceSuggestHandler;
+import server.handler.normal.PlaceSuggestHandler;
 
 import java.io.IOException;
 import java.io.PrintWriter;
