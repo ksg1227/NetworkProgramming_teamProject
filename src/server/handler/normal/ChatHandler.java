@@ -1,4 +1,4 @@
-package server.handler;
+package server.handler.normal;
 
 import java.io.BufferedReader;
 import java.io.IOException;

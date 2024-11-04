@@ -1,6 +1,6 @@
 package server.serverThread;
 
-import server.handler.ChatHandler;
+import server.handler.normal.ChatHandler;
 
 import java.io.IOException;
 import java.io.PrintWriter;

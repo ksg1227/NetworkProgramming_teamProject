@@ -1,7 +1,6 @@
 package server.serverThread;
 
-import server.handler.ChatHandler;
-import server.handler.StatisticHandler;
+import server.handler.normal.StatisticHandler;
 
 import java.io.IOException;
 import java.io.PrintWriter;

@@ -1,7 +1,7 @@
 package server.serverThread;
 
-import server.handler.ChatHandler;
-import server.handler.VoteHandler;
+import server.handler.host.HostVoteHandler;
+import server.handler.normal.VoteHandler;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -31,8 +31,10 @@ public class VoteServer extends Thread {
                 boolean isHost = Boolean.parseBoolean(br.readLine());
 
                 if (isHost) {
-                    String hostName = br.readLine();
-                    System.out.println("호스트 : " + hostName + "가 투표 기능에...?");
+//                    String hostName = br.readLine();
+//                    System.out.println("호스트 : " + hostName + "가 투표 기능에...?");
+                    HostVoteHandler hostVoteHandler = new HostVoteHandler(br, pw, onVoteClients);
+                    hostVoteHandler.start();
                     continue;
                 }
 

@@ -1,4 +1,4 @@
-package server.handler;
+package server.handler.normal;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,15 +7,15 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Map;
 
-public class StatisticHandler extends Thread {
+public class PlaceSuggestHandler extends Thread {
 
     Socket socket;
-    Map<String, PrintWriter> onStatisticClients;
+    Map<String, PrintWriter> onPlaceSuggestClients;
 
 
-    public StatisticHandler(Socket socket, Map<String, PrintWriter> onStatisticClients){
+    public PlaceSuggestHandler(Socket socket, Map<String, PrintWriter> onPlaceSuggestClients) {
         this.socket = socket;
-        this.onStatisticClients = onStatisticClients;
+        this.onPlaceSuggestClients = onPlaceSuggestClients;
     }
 
     @Override
@@ -23,25 +23,27 @@ public class StatisticHandler extends Thread {
         PrintWriter pw = null;
         BufferedReader br = null;
 
-        try{
+        try {
             br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             pw = new PrintWriter(socket.getOutputStream(), true);
 
             String userName = br.readLine();
 
-            onStatisticClients.put(userName, pw);
+            onPlaceSuggestClients.put(userName, pw);
 
-            System.out.println(userName + "님이 일정 확인 기능을 사용하셨습니다.");
+            System.out.println(userName + "님이 장소 제시 기능을 사용하셨습니다.");
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+
             try {
-                if(br != null) br.close();
+                if (br != null) br.close();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
-            if(pw != null) pw.close();
+            if (pw != null) pw.close();
         }
+
     }
 }
