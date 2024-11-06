@@ -22,5 +22,7 @@ public class ServerCore {
         voteServer.start();
         chatServer.start();
         statisticServer.start();
+
+
     }
 }
