@@ -24,7 +24,9 @@ public class VoteHandler extends Thread {
         try{
             String userName = br.readLine();
 
-            onVoteClients.put(userName, pw);
+            synchronized (onVoteClients) {
+                onVoteClients.put(userName, pw);
+            }
 
             System.out.println(userName + "님이 투표 기능을 사용하셨습니다.");
 

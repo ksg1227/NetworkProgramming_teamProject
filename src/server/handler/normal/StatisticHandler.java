@@ -29,7 +29,9 @@ public class StatisticHandler extends Thread {
 
             String userName = br.readLine();
 
-            onStatisticClients.put(userName, pw);
+            synchronized (onStatisticClients) {
+                onStatisticClients.put(userName, pw);
+            }
 
             System.out.println(userName + "님이 일정 확인 기능을 사용하셨습니다.");
         } catch (IOException e) {
