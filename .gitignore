@@ -2,8 +2,7 @@
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-.idea
-.idea/**
+clientOrderCounter.txt
 
 ### Eclipse ###
 .apt_generated
