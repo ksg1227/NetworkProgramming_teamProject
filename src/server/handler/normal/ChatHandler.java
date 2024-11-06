@@ -31,7 +31,7 @@ public class ChatHandler extends Thread {
                 onChatClients.put(userName, pw);
             }
 
-            System.out.println(userName + "님이 채팅 기능에 접속하셨습니다.");
+            broadcast(userName + "님이 채팅 기능에 접속하셨습니다.");
         } catch (Exception e) {
         }
     }
