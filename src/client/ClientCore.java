@@ -7,7 +7,7 @@ import java.net.Socket;
 
 import static client.ClientOrderGenerator.*;
 
-public class Client {
+public class ClientCore {
 
     public static void main(String[] args) {
 
