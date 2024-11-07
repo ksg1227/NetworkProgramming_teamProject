@@ -1,5 +1,6 @@
 package server.handler.normal;
 
+import java.awt.image.DataBufferDouble;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,38 +12,55 @@ import java.util.Map;
 public class ChatHandler extends Thread {
 
     Socket socket;
+    private PrintWriter pw;
+    private BufferedReader br;
     Map<String, PrintWriter> onChatClients;
 
+    String userName;
 
     public ChatHandler(Socket socket, Map<String, PrintWriter> onChatClients) {
         this.socket = socket;
         this.onChatClients = onChatClients;
-    }
-
-    @Override
-    public void run() {
-        PrintWriter pw = null;
-        BufferedReader br = null;
-
         try {
             br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             pw = new PrintWriter(socket.getOutputStream(), true);
 
-            String userName = br.readLine();
+            userName = br.readLine();
 
-            onChatClients.put(userName, pw);
-
-            System.out.println(userName + "님이 채팅 기능을 사용하셨습니다.");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            try {
-                if (br != null) br.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            synchronized (onChatClients) {
+                onChatClients.put(userName, pw);
             }
 
-            if (pw != null) pw.close();
+            broadcast(userName + "님이 채팅 기능에 접속하셨습니다.");
+        } catch (Exception e) {
+        }
+    }
+
+    @Override
+    public void run() {
+        try {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.equals("/quit"))
+                    break;
+                else
+                    broadcast(userName + " : " + line);
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        } finally {
+
+            synchronized (onChatClients) {
+                onChatClients.remove(userName);
+            }
+
+            broadcast(userName + "님이 채팅방을 나가셨습니다.");
+
+            try {
+                if (socket != null) socket.close();
+            } catch (Exception e) {
+
+            }
         }
     }
 

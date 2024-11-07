@@ -1,11 +1,13 @@
 package client;
 
+import client.input.ChatInputThread;
+
 import java.io.*;
 import java.net.Socket;
 
 import static client.ClientOrderGenerator.*;
 
-public class Client {
+public class ClientCore {
 
     public static void main(String[] args) {
 
@@ -182,6 +184,8 @@ public class Client {
                         break;
                     case "5": // 채팅 기능
                         try {
+                            System.out.println("채팅방에 입장하셨습니다.\n");
+
                             sock = new Socket("localhost", 10005);
 
                             br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
@@ -189,9 +193,32 @@ public class Client {
 
                             pw.println(name);
 
+                            ChatInputThread inputThread = new ChatInputThread(br);
+                            inputThread.start();
+
+                            String input;
+
+                            while (!(input = keyBoard.readLine()).equals("/나가기")) {
+                                pw.println(input);
+                            }
+
+                            System.out.println("채팅방을 나갑니다.");
+
+
+                            // 이 순서를 안지키면 inputThread가 계속 실행되고있는 문제가 발생함.
+                            inputThread.interrupt();
+
+                            // 소켓을 닫음으로써 inputThread에서 예외 발생. 그 예외를 catch로 잡으며 inputThread 종료
+                            sock.close();
+
+                            // inputThread가 종료되면 다음 동작 실행하도록 join 걸어줌
+                            inputThread.join();
+
 
                         } catch (IOException e) {
                             throw new RuntimeException(e);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
                         } finally {
                             if (br != null) {
                                 br.close();
@@ -201,8 +228,12 @@ public class Client {
                                 pw.close();
                             }
 
-                            if (sock != null) {
-                                sock.close();
+                            if (sock != null && !sock.isClosed()) {
+                                try {
+                                    sock.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
 

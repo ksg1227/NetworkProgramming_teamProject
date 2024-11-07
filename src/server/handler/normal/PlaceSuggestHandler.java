@@ -29,7 +29,9 @@ public class PlaceSuggestHandler extends Thread {
 
             String userName = br.readLine();
 
-            onPlaceSuggestClients.put(userName, pw);
+            synchronized (onPlaceSuggestClients) {
+                onPlaceSuggestClients.put(userName, pw);
+            }
 
             System.out.println(userName + "님이 장소 제시 기능을 사용하셨습니다.");
         } catch (IOException e) {
