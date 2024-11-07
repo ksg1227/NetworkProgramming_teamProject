@@ -54,13 +54,14 @@ public class ClientCore {
                 switch (functionNum) {
                     case "1": // 날짜 조율 기능
                         try {
-                            sock = new Socket("localhost", 10001);
+                            sock = new Socket("localhost", 10000);
 
                             br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
                             pw = new PrintWriter(sock.getOutputStream(), true);
 
                             // ScheduleServer로 호스트 여부와 클라이언트의 이름을 전송
                             // 반드시 순서가 지켜져야합니다!
+                            pw.println("날짜 조율"); // 어떤 기능을 사용하는지에 대한 정보를 적어주어야함.
                             pw.println(isHost);
                             pw.println(name);
 
@@ -92,11 +93,12 @@ public class ClientCore {
                         break;
                     case "2": // 장소 제시 기능
                         try {
-                            sock = new Socket("localhost", 10002);
+                            sock = new Socket("localhost", 10000);
 
                             br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
                             pw = new PrintWriter(sock.getOutputStream(), true);
 
+                            pw.println("장소 제시"); // 어떤 기능을 사용하는지에 대한 정보를 적어주어야함
                             pw.println(name);
 
 
@@ -119,13 +121,14 @@ public class ClientCore {
                         break;
                     case "3": // 투표 기능
                         try {
-                            sock = new Socket("localhost", 10003);
+                            sock = new Socket("localhost", 10000);
 
                             br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
                             pw = new PrintWriter(sock.getOutputStream(), true);
 
                             // VoteServer로 호스트 여부와 클라이언트의 이름을 전송
                             // 반드시 순서가 지켜져야합니다!
+                            pw.println("투표"); // 어떤 기능을 사용하는지에 대한 정보를 적어주어야함
                             pw.println(isHost);
                             pw.println(name);
 
@@ -157,11 +160,12 @@ public class ClientCore {
                         break;
                     case "4": // 일정 확인 기능
                         try {
-                            sock = new Socket("localhost", 10004);
+                            sock = new Socket("localhost", 10000);
 
                             br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
                             pw = new PrintWriter(sock.getOutputStream(), true);
 
+                            pw.println("일정 확인"); // 어떤 기능을 사용하는지에 대한 정보를 적어주어야함
                             pw.println(name);
 
 
@@ -186,7 +190,7 @@ public class ClientCore {
                         try {
                             System.out.println("채팅방에 입장하셨습니다.\n");
 
-                            sock = new Socket("localhost", 10005);
+                            sock = new Socket("localhost", 10001);
 
                             br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
                             pw = new PrintWriter(sock.getOutputStream(), true);

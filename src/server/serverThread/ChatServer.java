@@ -15,11 +15,11 @@ public class ChatServer extends Thread {
 
     @Override
     public void run() {
-        System.out.println("일정 조율 기능 연결 대기중");
+        System.out.println("채팅 기능 연결 대기중");
         ServerSocket chatServerSocket = null;
 
         try{
-            chatServerSocket = new ServerSocket(10005);
+            chatServerSocket = new ServerSocket(10001);
 
             while(true) {
                 Socket socket = chatServerSocket.accept();

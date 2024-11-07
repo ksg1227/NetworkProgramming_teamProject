@@ -9,24 +9,21 @@ import java.util.Map;
 
 public class StatisticHandler extends Thread {
 
-    Socket socket;
+    BufferedReader br;
+    PrintWriter pw;
     Map<String, PrintWriter> onStatisticClients;
 
 
-    public StatisticHandler(Socket socket, Map<String, PrintWriter> onStatisticClients){
-        this.socket = socket;
+    public StatisticHandler(BufferedReader br,PrintWriter pw, Map<String, PrintWriter> onStatisticClients){
+        this.br = br;
+        this.pw = pw;
         this.onStatisticClients = onStatisticClients;
     }
 
     @Override
     public void run() {
-        PrintWriter pw = null;
-        BufferedReader br = null;
 
         try{
-            br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            pw = new PrintWriter(socket.getOutputStream(), true);
-
             String userName = br.readLine();
 
             synchronized (onStatisticClients) {

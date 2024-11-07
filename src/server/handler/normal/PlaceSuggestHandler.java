@@ -9,24 +9,21 @@ import java.util.Map;
 
 public class PlaceSuggestHandler extends Thread {
 
-    Socket socket;
+    BufferedReader br;
+    PrintWriter pw;
     Map<String, PrintWriter> onPlaceSuggestClients;
 
 
-    public PlaceSuggestHandler(Socket socket, Map<String, PrintWriter> onPlaceSuggestClients) {
-        this.socket = socket;
+    public PlaceSuggestHandler(BufferedReader br, PrintWriter pw, Map<String, PrintWriter> onPlaceSuggestClients) {
+        this.br = br;
+        this.pw = pw;
         this.onPlaceSuggestClients = onPlaceSuggestClients;
     }
 
     @Override
     public void run() {
-        PrintWriter pw = null;
-        BufferedReader br = null;
 
         try {
-            br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            pw = new PrintWriter(socket.getOutputStream(), true);
-
             String userName = br.readLine();
 
             synchronized (onPlaceSuggestClients) {
@@ -37,7 +34,6 @@ public class PlaceSuggestHandler extends Thread {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-
             try {
                 if (br != null) br.close();
             } catch (IOException e) {
