@@ -11,24 +11,22 @@ import java.util.Map;
 
 public class ChatHandler extends Thread {
 
-    Socket socket;
     private PrintWriter pw;
     private BufferedReader br;
     Map<String, PrintWriter> onChatClients;
 
     String userName;
 
-    public ChatHandler(Socket socket, Map<String, PrintWriter> onChatClients) {
-        this.socket = socket;
+    public ChatHandler(BufferedReader br, PrintWriter pw, Map<String, PrintWriter> onChatClients) {
+        this.br = br;
+        this.pw = pw;
         this.onChatClients = onChatClients;
+
         try {
-            br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            pw = new PrintWriter(socket.getOutputStream(), true);
+            userName = br.readLine(); // 객체를 생성하면서 inputStream으로부터 사용자 이름을 받아옴
 
-            userName = br.readLine();
-
-            synchronized (onChatClients) {
-                onChatClients.put(userName, pw);
+            synchronized (this.onChatClients) {
+                this.onChatClients.put(userName, pw); // 현재 채팅 기능을 사용중인 사용자를 추적하는 맵에 추가
             }
 
             broadcast(userName + "님이 채팅 기능에 접속하셨습니다.");
@@ -41,7 +39,7 @@ public class ChatHandler extends Thread {
         try {
             String line;
             while ((line = br.readLine()) != null) {
-                if (line.equals("/quit"))
+                if (line.equals("/나가기"))
                     break;
                 else
                     broadcast(userName + " : " + line);
@@ -51,16 +49,11 @@ public class ChatHandler extends Thread {
         } finally {
 
             synchronized (onChatClients) {
-                onChatClients.remove(userName);
+                onChatClients.remove(userName); // /나가기 를 입력할 경우 map에서 해당 사용자 삭제
             }
 
             broadcast(userName + "님이 채팅방을 나가셨습니다.");
-
-            try {
-                if (socket != null) socket.close();
-            } catch (Exception e) {
-
-            }
+            // 채팅방에서 나간 사용자를 제외한 나머지 사용자들 중 채팅 기능을 이용하는 사람들에게만 broadcast
         }
     }
 

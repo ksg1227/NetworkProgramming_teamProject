@@ -32,16 +32,6 @@ public class VoteHandler extends Thread {
 
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-
-            try {
-                if (br != null) br.close();
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            if (pw != null) pw.close();
         }
 
 

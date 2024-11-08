@@ -33,14 +33,6 @@ public class PlaceSuggestHandler extends Thread {
             System.out.println(userName + "님이 장소 제시 기능을 사용하셨습니다.");
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            try {
-                if (br != null) br.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            if (pw != null) pw.close();
         }
 
     }

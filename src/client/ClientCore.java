@@ -14,12 +14,34 @@ public class ClientCore {
         int order = getClientOrderCounter();
         boolean isHost = false;
         increaseClientOrderCounter();
-
-        Socket sock = null;
         BufferedReader keyBoard = null;
 
+        Socket scheduleManageSocket = null;
+        Socket chatSocket = null;
+
+        BufferedReader forChatBr = null;
+        PrintWriter forChatPw = null;
+
+        BufferedReader forScheduleBr = null;
+        PrintWriter forSchedulePw = null;
+
+
         try {
-            keyBoard = new BufferedReader(new InputStreamReader(System.in));
+            scheduleManageSocket = new Socket("localhost", 10000);
+            chatSocket = new Socket("localhost", 10001);
+
+
+            try {
+                forChatBr = new BufferedReader(new InputStreamReader(chatSocket.getInputStream()));
+                forChatPw = new PrintWriter(chatSocket.getOutputStream(), true);
+                forScheduleBr = new BufferedReader(new InputStreamReader(scheduleManageSocket.getInputStream()));
+                forSchedulePw = new PrintWriter(scheduleManageSocket.getOutputStream(), true);
+                keyBoard = new BufferedReader(new InputStreamReader(System.in));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            
             boolean isRunning = true;
 
             System.out.println("\"이때 돼?\"에 접속하셨습니다.\n");
@@ -48,22 +70,15 @@ public class ClientCore {
                 System.out.print("어떤 기능을 사용하시겠습니까? (q 를 입력할 시 프로그램을 종료합니다.) : ");
                 String functionNum = keyBoard.readLine();
 
-                PrintWriter pw = null;
-                BufferedReader br = null;
 
                 switch (functionNum) {
                     case "1": // 날짜 조율 기능
                         try {
-                            sock = new Socket("localhost", 10000);
-
-                            br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-                            pw = new PrintWriter(sock.getOutputStream(), true);
-
                             // ScheduleServer로 호스트 여부와 클라이언트의 이름을 전송
                             // 반드시 순서가 지켜져야합니다!
-                            pw.println("날짜 조율"); // 어떤 기능을 사용하는지에 대한 정보를 적어주어야함.
-                            pw.println(isHost);
-                            pw.println(name);
+                            forSchedulePw.println("날짜 조율"); // 어떤 기능을 사용하는지에 대한 정보를 적어주어야함.
+                            forSchedulePw.println(isHost);
+                            forSchedulePw.println(name);
 
                             if (isHost) { // 호스트 클라이언트가 수행할 코드 영역 : 호스트 클라이언트는 시작일, 종료일을 설정해야함
 
@@ -74,63 +89,31 @@ public class ClientCore {
                             }
 
 
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        } finally {
-                            if (br != null) {
-                                br.close();
-                            }
-
-                            if (pw != null) {
-                                pw.close();
-                            }
-
-                            if (sock != null) {
-                                sock.close();
-                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
 
                         break;
                     case "2": // 장소 제시 기능
                         try {
-                            sock = new Socket("localhost", 10000);
 
-                            br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-                            pw = new PrintWriter(sock.getOutputStream(), true);
-
-                            pw.println("장소 제시"); // 어떤 기능을 사용하는지에 대한 정보를 적어주어야함
-                            pw.println(name);
+                            forSchedulePw.println("장소 제시"); // 어떤 기능을 사용하는지에 대한 정보를 적어주어야함
+                            forSchedulePw.println(name);
 
 
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        } finally {
-                            if (br != null) {
-                                br.close();
-                            }
-
-                            if (pw != null) {
-                                pw.close();
-                            }
-
-                            if (sock != null) {
-                                sock.close();
-                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
 
                         break;
                     case "3": // 투표 기능
                         try {
-                            sock = new Socket("localhost", 10000);
-
-                            br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-                            pw = new PrintWriter(sock.getOutputStream(), true);
 
                             // VoteServer로 호스트 여부와 클라이언트의 이름을 전송
                             // 반드시 순서가 지켜져야합니다!
-                            pw.println("투표"); // 어떤 기능을 사용하는지에 대한 정보를 적어주어야함
-                            pw.println(isHost);
-                            pw.println(name);
+                            forSchedulePw.println("투표"); // 어떤 기능을 사용하는지에 대한 정보를 적어주어야함
+                            forSchedulePw.println(isHost);
+                            forSchedulePw.println(name);
 
 
                             if (isHost) {  // 호스트 클라이언트가 수행할 코드 영역 : 호스트 클라이언트는 투표를 시작하는 기능도 필요
@@ -141,48 +124,20 @@ public class ClientCore {
                             }
 
 
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        } finally {
-                            if (br != null) {
-                                br.close();
-                            }
-
-                            if (pw != null) {
-                                pw.close();
-                            }
-
-                            if (sock != null) {
-                                sock.close();
-                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
 
                         break;
                     case "4": // 일정 확인 기능
                         try {
-                            sock = new Socket("localhost", 10000);
 
-                            br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-                            pw = new PrintWriter(sock.getOutputStream(), true);
-
-                            pw.println("일정 확인"); // 어떤 기능을 사용하는지에 대한 정보를 적어주어야함
-                            pw.println(name);
+                            forSchedulePw.println("일정 확인"); // 어떤 기능을 사용하는지에 대한 정보를 적어주어야함
+                            forSchedulePw.println(name);
 
 
-                        } catch (IOException e) {
+                        } catch (Exception e) {
                             throw new RuntimeException(e);
-                        } finally {
-                            if (br != null) {
-                                br.close();
-                            }
-
-                            if (pw != null) {
-                                pw.close();
-                            }
-
-                            if (sock != null) {
-                                sock.close();
-                            }
                         }
 
                         break;
@@ -190,30 +145,25 @@ public class ClientCore {
                         try {
                             System.out.println("채팅방에 입장하셨습니다.\n");
 
-                            sock = new Socket("localhost", 10001);
+                            forChatPw.println("채팅");
+                            forChatPw.println(name);
 
-                            br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-                            pw = new PrintWriter(sock.getOutputStream(), true);
-
-                            pw.println(name);
-
-                            ChatInputThread inputThread = new ChatInputThread(br);
+                            ChatInputThread inputThread = new ChatInputThread(forChatBr);
                             inputThread.start();
 
                             String input;
 
-                            while (!(input = keyBoard.readLine()).equals("/나가기")) {
-                                pw.println(input);
+                            while (true) {
+                                input = keyBoard.readLine();
+                                forChatPw.println(input);
+
+                                if (input.equals("/나가기")) break;
                             }
 
                             System.out.println("채팅방을 나갑니다.");
 
 
-                            // 이 순서를 안지키면 inputThread가 계속 실행되고있는 문제가 발생함.
-                            inputThread.interrupt();
-
-                            // 소켓을 닫음으로써 inputThread에서 예외 발생. 그 예외를 catch로 잡으며 inputThread 종료
-                            sock.close();
+                            inputThread.stopThread();
 
                             // inputThread가 종료되면 다음 동작 실행하도록 join 걸어줌
                             inputThread.join();
@@ -223,22 +173,6 @@ public class ClientCore {
                             throw new RuntimeException(e);
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
-                        } finally {
-                            if (br != null) {
-                                br.close();
-                            }
-
-                            if (pw != null) {
-                                pw.close();
-                            }
-
-                            if (sock != null && !sock.isClosed()) {
-                                try {
-                                    sock.close();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
                         }
 
                         break;
@@ -247,13 +181,24 @@ public class ClientCore {
                         break;
                     default:
                         System.out.println("잘못된 입력입니다. 입력을 다시 확인해주세요");
-
                 }
             }
 
 
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                if (forChatPw != null) forChatPw.close();
+                if (forChatBr != null) forChatBr.close();
+                if (forSchedulePw != null) forSchedulePw.close();
+                if (forScheduleBr != null) forScheduleBr.close();
+                if (scheduleManageSocket != null) scheduleManageSocket.close();
+                if (chatSocket != null) chatSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
