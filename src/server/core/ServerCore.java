@@ -10,17 +10,10 @@ public class ServerCore {
 
     public static void main(String[] args) {
 
-
-        ScheduleServer scheduleServer = new ScheduleServer();
-        PlaceSuggestServer placeSuggestServer = new PlaceSuggestServer();
-        VoteServer voteServer = new VoteServer();
+        ScheduleManageServer scheduleManageServer = new ScheduleManageServer();
         ChatServer chatServer = new ChatServer();
-        StatisticServer statisticServer = new StatisticServer();
 
-        scheduleServer.start();
-        placeSuggestServer.start();
-        voteServer.start();
+        scheduleManageServer.start();
         chatServer.start();
-        statisticServer.start();
     }
 }

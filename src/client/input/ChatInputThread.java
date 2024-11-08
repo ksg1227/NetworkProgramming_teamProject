@@ -1,10 +1,11 @@
 package client.input;
 
 import java.io.BufferedReader;
-import java.net.Socket;
+import java.io.IOException;
 
 public class ChatInputThread extends Thread {
     private BufferedReader br;
+    private volatile boolean running = true; // 종료 플래그
 
     public ChatInputThread(BufferedReader br) {
         this.br = br;
@@ -13,16 +14,26 @@ public class ChatInputThread extends Thread {
     @Override
     public void run() {
         try {
-            String line;
-            while (!Thread.currentThread().isInterrupted() && (line = br.readLine()) != null) {
-                System.out.println(line);
+            while (running) {
+                // 입력이 준비된 경우에만 readLine 호출
+                if (br.ready()) {
+                    String line = br.readLine();
+                    if (line != null) {
+                        System.out.println(line);
+                    }
+                } else {
+                    // 입력이 없으면 잠시 대기
+                    Thread.sleep(100); // 100ms 정도 딜레이를 줌
+                }
             }
-        } catch (Exception e) {
-        } finally {
-            try {
-                if (br != null) br.close();
-            } catch (Exception e) {
-            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // 인터럽트 상태를 다시 설정
         }
+    }
+
+    public void stopThread() {
+        running = false;
     }
 }
