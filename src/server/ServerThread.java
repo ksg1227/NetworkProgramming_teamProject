@@ -55,25 +55,25 @@ public class ServerThread extends Thread {
             assert packet != null;
             switch (packet.clientState()) {
                 case HOME -> {
-
+                    System.out.println("home");
                 }
                 case CHATTING -> {
-
+                    System.out.println("chat");
                 }
                 case SCHEDULE -> {
-
+                    System.out.println("schedule");
                 }
                 case STATISTIC -> {
-
+                    System.out.println("statistic");
                 }
                 case PLACE_VOTE -> {
-
+                    System.out.println("vote");
                 }
                 case PLACE_SUGGESTION -> {
-
+                    System.out.println("place-suggest");
                 }
                 case null, default -> {
-
+                    System.out.println("nothing");
                 }
             }
         }

@@ -1,13 +1,12 @@
 package server;
 
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ServerCore {
+public class ServerCore extends Thread {
     private static final Map<String, ObjectOutputStream> onScheduleClients = new HashMap<>();
     private static final Map<String, ObjectOutputStream> onStatisticClients = new HashMap<>();
     private static final Map<String, ObjectOutputStream> onVoteClients = new HashMap<>();
@@ -15,7 +14,8 @@ public class ServerCore {
     private static final Map<String, ObjectOutputStream> onChatClients = new HashMap<>();
     private static ServerSocket serverSocket = null;
 
-    public static void main(String[] args) {
+    @Override
+    public void run() {
         try {
             serverSocket = new ServerSocket(10000);
         } catch (Exception e) {
