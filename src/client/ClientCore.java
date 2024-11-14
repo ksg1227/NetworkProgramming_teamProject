@@ -14,8 +14,8 @@ public class ClientCore extends Thread {
     public ClientCore() {
         try {
             socket = new Socket("localhost", 10000);
-            serverInput = new ObjectInputStream(socket.getInputStream());
             serverOutput = new ObjectOutputStream(socket.getOutputStream());
+            serverInput = new ObjectInputStream(socket.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -23,14 +23,7 @@ public class ClientCore extends Thread {
 
     @Override
     public void run() {
-
-        System.out.println("\"이때 돼?\"에 접속하셨습니다.\n");
-
-        System.out.print("이름을 입력해주세요 : ");
-
-        String name = scanner.nextLine();
-
-        String scheduleName = null;
+        System.out.println("Connected to server");
 
         while (true) {
             // Loop

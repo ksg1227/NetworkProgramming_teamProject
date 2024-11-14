@@ -33,8 +33,8 @@ public class ServerThread extends Thread {
         ServerThread.onPlaceSuggestClients = onPlaceSuggestClients;
 
         try {
-            this.clientInput = new ObjectInputStream(socket.getInputStream());
             this.clientOutput = new ObjectOutputStream(socket.getOutputStream());
+            this.clientInput = new ObjectInputStream(socket.getInputStream());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

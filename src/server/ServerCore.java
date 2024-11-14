@@ -14,18 +14,23 @@ public class ServerCore extends Thread {
     private static final Map<String, ObjectOutputStream> onChatClients = new HashMap<>();
     private static ServerSocket serverSocket = null;
 
-    @Override
-    public void run() {
+    public ServerCore() {
         try {
             serverSocket = new ServerSocket(10000);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void run() {
+        System.out.println("Server started");
 
         while(true) {
             Socket socket = null;
 
             try {
+                System.out.println("Waiting for connection");
                 socket = serverSocket.accept();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -42,6 +47,8 @@ public class ServerCore extends Thread {
                     onPlaceSuggestClients
             );
             chatServerThread.start();
+
+            System.out.println("Add client");
         }
     }
 }
