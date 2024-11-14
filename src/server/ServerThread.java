@@ -1,0 +1,81 @@
+package server;
+
+import dto.Packet;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.util.Map;
+
+public class ServerThread extends Thread {
+    private static Map<String, ObjectOutputStream> onChatClients ;
+    private static Map<String, ObjectOutputStream> onScheduleClients;
+    private static Map<String, ObjectOutputStream> onStatisticClients;
+    private static Map<String, ObjectOutputStream> onVoteClients;
+    private static Map<String, ObjectOutputStream> onPlaceSuggestClients;
+
+    private final ObjectInputStream clientInput;
+    private final ObjectOutputStream clientOutput;
+
+    public ServerThread(
+            Socket socket,
+            Map<String, ObjectOutputStream> onChatClients,
+            Map<String, ObjectOutputStream> onScheduleClients,
+            Map<String, ObjectOutputStream> onStatisticClients,
+            Map<String, ObjectOutputStream> onVoteClients,
+            Map<String, ObjectOutputStream> onPlaceSuggestClients
+            ) {
+        ServerThread.onChatClients = onChatClients;
+        ServerThread.onScheduleClients = onScheduleClients;
+        ServerThread.onStatisticClients = onStatisticClients;
+        ServerThread.onVoteClients = onVoteClients;
+        ServerThread.onPlaceSuggestClients = onPlaceSuggestClients;
+
+        try {
+            this.clientInput = new ObjectInputStream(socket.getInputStream());
+            this.clientOutput = new ObjectOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // 채팅 기능을 관리하는 스레드
+    @Override
+    public void run() {
+        Packet<Object> packet = null;
+
+        while (!currentThread().isInterrupted()) {
+            try {
+                packet = (Packet<Object>)clientInput.readObject();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            assert packet != null;
+            switch (packet.clientState()) {
+                case HOME -> {
+
+                }
+                case CHATTING -> {
+
+                }
+                case SCHEDULE -> {
+
+                }
+                case STATISTIC -> {
+
+                }
+                case PLACE_VOTE -> {
+
+                }
+                case PLACE_SUGGESTION -> {
+
+                }
+                case null, default -> {
+
+                }
+            }
+        }
+    }
+}
