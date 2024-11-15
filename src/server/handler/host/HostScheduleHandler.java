@@ -1,24 +1,15 @@
 package server.handler.host;
 
-import server.handler.normal.ScheduleHandler;
+import server.handler.normal.ServerScheduleHandler;
 
 import java.io.BufferedReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.util.Map;
 
-public class HostScheduleHandler extends ScheduleHandler {
-
-    BufferedReader br;
-    PrintWriter pw;
-    Map<String, PrintWriter> onVoteClients;
-
-    public HostScheduleHandler(BufferedReader br, PrintWriter pw, Map<String, PrintWriter> onScheduleClients) {
-        super(br, pw, onScheduleClients);
-    }
-
-    @Override
-    public void run() {
-        System.out.println("호스트입니다.");
-        super.run();
+public class HostScheduleHandler extends ServerScheduleHandler {
+    public HostScheduleHandler(ObjectInputStream clientInput, ObjectOutputStream clientOutput, Map<String, ObjectOutputStream> onFeatureClients) {
+        super(clientInput, clientOutput, onFeatureClients);
     }
 }

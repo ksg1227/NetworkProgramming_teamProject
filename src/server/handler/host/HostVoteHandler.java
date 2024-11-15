@@ -1,24 +1,15 @@
 package server.handler.host;
 
-import server.handler.normal.VoteHandler;
+import server.handler.normal.ServerVoteHandler;
 
 import java.io.BufferedReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.util.Map;
 
-public class HostVoteHandler extends VoteHandler {
-
-    BufferedReader br;
-    PrintWriter pw;
-    Map<String, PrintWriter> onVoteClients;
-
-    public HostVoteHandler(BufferedReader br, PrintWriter pw, Map<String, PrintWriter> onVoteClients) {
-        super(br, pw, onVoteClients);
-    }
-
-    @Override
-    public void run() {
-        System.out.println("호스트입니다.");
-        super.run();
+public class HostVoteHandler extends ServerVoteHandler {
+    public HostVoteHandler(ObjectInputStream clientInput, ObjectOutputStream clientOutput, Map<String, ObjectOutputStream> onFeatureClients) {
+        super(clientInput, clientOutput, onFeatureClients);
     }
 }
