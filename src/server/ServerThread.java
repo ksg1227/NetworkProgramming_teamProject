@@ -38,6 +38,12 @@ public class ServerThread extends Thread {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        try {
+            clientOutput.writeObject(ClientOrderGenerator.getClientOrder());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // 채팅 기능을 관리하는 스레드

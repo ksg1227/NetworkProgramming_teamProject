@@ -1,15 +1,21 @@
 package client;
 
+import dto.ClientState;
+import dto.Packet;
+import entity.User;
+
 import java.io.*;
 import java.net.Socket;
-import java.util.Scanner;
+
+import static dto.ClientState.*;
 
 public class ClientCore extends Thread {
     private Socket socket;
     private ObjectOutputStream serverOutput;
     private ObjectInputStream serverInput;
-    private final Scanner scanner = new Scanner(System.in);
+    private final BufferedReader keyBoard = new BufferedReader(new InputStreamReader(System.in));
     private final PrintWriter writer = new PrintWriter(System.out, true);
+    private User client;
 
     public ClientCore() {
         try {
@@ -23,10 +29,42 @@ public class ClientCore extends Thread {
 
     @Override
     public void run() {
-        System.out.println("Connected to server");
+        System.out.println("Connected to server\n");
+
+        createClient();
+        clientHostValidate();
 
         while (true) {
-            // Loop
+
+        }
+
+    }
+
+
+    private void createClient() {
+        System.out.print("이름 : ");
+
+        String userName = null;
+        try {
+            userName = keyBoard.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        client = new User(userName);
+    }
+
+    private void clientHostValidate() {
+        try {
+            int clientOrder = (int) serverInput.readObject();
+
+            if (clientOrder == 1) {
+                client.setHost(true);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 }
