@@ -30,4 +30,14 @@ public class User implements Serializable {
     public void setScheduleVoteCompleted(boolean scheduleVoteCompleted) {
         this.scheduleVoteCompleted = scheduleVoteCompleted;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "userName='" + userName + '\'' +
+                ", isHost=" + isHost +
+                ", placeVoteCompleted=" + placeVoteCompleted +
+                ", scheduleVoteCompleted=" + scheduleVoteCompleted +
+                '}';
+    }
 }
