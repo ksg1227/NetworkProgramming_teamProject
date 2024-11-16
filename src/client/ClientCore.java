@@ -32,7 +32,8 @@ public class ClientCore extends Thread {
         System.out.println("Connected to server\n");
 
         createClient();
-        clientHostValidate();
+
+        System.out.println(client.toString() + " connected");
 
         while (true) {
 
@@ -44,27 +45,21 @@ public class ClientCore extends Thread {
     private void createClient() {
         System.out.print("이름 : ");
 
-        String userName = null;
+        String userName;
         try {
             userName = keyBoard.readLine();
+            serverOutput.writeObject(userName);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        client = new User(userName);
-    }
-
-    private void clientHostValidate() {
         try {
-            int clientOrder = (int) serverInput.readObject();
-
-            if (clientOrder == 1) {
-                client.setHost(true);
-            }
+            client = (User) serverInput.readObject();
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+
     }
 }
