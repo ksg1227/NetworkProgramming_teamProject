@@ -1,19 +1,16 @@
 package client;
 
-import dto.ClientState;
-import dto.Packet;
 import entity.User;
 
 import java.io.*;
 import java.net.Socket;
-
-import static dto.ClientState.*;
+import java.util.Scanner;
 
 public class ClientCore extends Thread {
     private Socket socket;
     private ObjectOutputStream serverOutput;
     private ObjectInputStream serverInput;
-    private final BufferedReader keyBoard = new BufferedReader(new InputStreamReader(System.in));
+    private final Scanner scanner = new Scanner(System.in);
     private final PrintWriter writer = new PrintWriter(System.out, true);
     private User client;
 
@@ -47,7 +44,7 @@ public class ClientCore extends Thread {
 
         String userName;
         try {
-            userName = keyBoard.readLine();
+            userName = scanner.nextLine();
             serverOutput.writeObject(userName);
         } catch (IOException e) {
             e.printStackTrace();
