@@ -5,14 +5,10 @@ import java.io.Serializable;
 public class User implements Serializable {
     private String userName;
     private boolean isHost;
-    private boolean placeVoteCompleted;
-    private boolean scheduleVoteCompleted;
 
     public User(String userName) {
         this.userName = userName;
         this.isHost = false;
-        this.placeVoteCompleted = false;
-        this.scheduleVoteCompleted = false;
     }
 
     public boolean getHost() {
@@ -23,21 +19,11 @@ public class User implements Serializable {
         isHost = host;
     }
 
-    public void setPlaceVoteCompleted(boolean placeVoteCompleted) {
-        this.placeVoteCompleted = placeVoteCompleted;
-    }
-
-    public void setScheduleVoteCompleted(boolean scheduleVoteCompleted) {
-        this.scheduleVoteCompleted = scheduleVoteCompleted;
-    }
-
     @Override
     public String toString() {
         return "User{" +
                 "userName='" + userName + '\'' +
                 ", isHost=" + isHost +
-                ", placeVoteCompleted=" + placeVoteCompleted +
-                ", scheduleVoteCompleted=" + scheduleVoteCompleted +
                 '}';
     }
 }

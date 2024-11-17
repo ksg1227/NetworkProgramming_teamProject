@@ -30,7 +30,7 @@ public class ClientCore extends Thread {
 
         createClient();
 
-        System.out.println(client.toString() + " connected");
+        System.out.println(client+ " connected");
 
         while (true) {
 
