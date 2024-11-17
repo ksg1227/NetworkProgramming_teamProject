@@ -1,6 +1,7 @@
 package server;
 
 import dto.Packet;
+import entity.User;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,7 +10,7 @@ import java.net.Socket;
 import java.util.Map;
 
 public class ServerThread extends Thread {
-    private static Map<String, ObjectOutputStream> onChatClients ;
+    private static Map<String, ObjectOutputStream> onChatClients;
     private static Map<String, ObjectOutputStream> onScheduleClients;
     private static Map<String, ObjectOutputStream> onStatisticClients;
     private static Map<String, ObjectOutputStream> onVoteClients;
@@ -18,6 +19,8 @@ public class ServerThread extends Thread {
     private final ObjectInputStream clientInput;
     private final ObjectOutputStream clientOutput;
 
+    private final User client;
+
     public ServerThread(
             Socket socket,
             Map<String, ObjectOutputStream> onChatClients,
@@ -25,7 +28,7 @@ public class ServerThread extends Thread {
             Map<String, ObjectOutputStream> onStatisticClients,
             Map<String, ObjectOutputStream> onVoteClients,
             Map<String, ObjectOutputStream> onPlaceSuggestClients
-            ) {
+    ) {
         ServerThread.onChatClients = onChatClients;
         ServerThread.onScheduleClients = onScheduleClients;
         ServerThread.onStatisticClients = onStatisticClients;
@@ -38,6 +41,27 @@ public class ServerThread extends Thread {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+
+        try {
+            String userName = (String) clientInput.readObject();
+
+            client = new User(userName);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (ClientOrderGenerator.getClientOrder() == 1) {
+            client.setHost(true);
+        }
+
+        try {
+            clientOutput.writeObject(client);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // 채팅 기능을 관리하는 스레드
@@ -47,7 +71,7 @@ public class ServerThread extends Thread {
 
         while (!currentThread().isInterrupted()) {
             try {
-                packet = (Packet<Object>)clientInput.readObject();
+                packet = (Packet<Object>) clientInput.readObject();
             } catch (Exception e) {
                 e.printStackTrace();
             }
