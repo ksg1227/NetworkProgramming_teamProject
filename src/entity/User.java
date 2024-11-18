@@ -10,11 +10,6 @@ public class User implements Serializable {
         this.userName = userName;
         this.isHost = false;
     }
-
-    public boolean getHost() {
-        return isHost;
-    }
-
     public void setHost(boolean host) {
         isHost = host;
     }
@@ -25,5 +20,13 @@ public class User implements Serializable {
                 "userName='" + userName + '\'' +
                 ", isHost=" + isHost +
                 '}';
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public boolean isHost() {
+        return isHost;
     }
 }
