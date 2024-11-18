@@ -3,6 +3,7 @@ package server;
 import dto.ClientState;
 import dto.Packet;
 import entity.User;
+import server.handler.normal.ServerPlaceSuggestHandler;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -45,6 +46,7 @@ public class ServerThread extends Thread {
 
         try {
             this.clientOutput = new ObjectOutputStream(socket.getOutputStream());
+            clientOutput.flush();
             this.clientInput = new ObjectInputStream(socket.getInputStream());
         } catch (IOException e) {
             throw new RuntimeException(e);

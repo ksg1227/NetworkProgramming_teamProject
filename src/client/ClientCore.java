@@ -20,6 +20,7 @@ public class ClientCore extends Thread {
         try {
             socket = new Socket("localhost", 10000);
             serverOutput = new ObjectOutputStream(socket.getOutputStream());
+            serverOutput.flush();
             serverInput = new ObjectInputStream(socket.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
