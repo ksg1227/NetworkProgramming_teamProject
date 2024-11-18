@@ -1,5 +1,6 @@
 package server;
 
+import dto.ClientState;
 import dto.Packet;
 import entity.User;
 
@@ -7,7 +8,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.Map;
+
+import static dto.ClientState.*;
+import static java.lang.Boolean.*;
 
 public class ServerThread extends Thread {
     private static Map<String, ObjectOutputStream> onChatClients;
@@ -20,6 +25,8 @@ public class ServerThread extends Thread {
     private final ObjectOutputStream clientOutput;
 
     private final User client;
+
+    private static final Map<ClientState, Boolean> checkIsFirstAccess = new HashMap<>();
 
     public ServerThread(
             Socket socket,
@@ -34,6 +41,9 @@ public class ServerThread extends Thread {
         ServerThread.onStatisticClients = onStatisticClients;
         ServerThread.onVoteClients = onVoteClients;
         ServerThread.onPlaceSuggestClients = onPlaceSuggestClients;
+
+        checkIsFirstAccess.put(PLACE_VOTE, TRUE);
+        checkIsFirstAccess.put(SCHEDULE, TRUE);
 
         try {
             this.clientOutput = new ObjectOutputStream(socket.getOutputStream());
@@ -76,6 +86,7 @@ public class ServerThread extends Thread {
                 e.printStackTrace();
             }
 
+            // TODO : 각각의 기능 구현 필요
             assert packet != null;
             switch (packet.clientState()) {
                 case HOME -> {
@@ -86,12 +97,26 @@ public class ServerThread extends Thread {
                 }
                 case SCHEDULE -> {
                     System.out.println("schedule");
+
+                    if(!isFirstAccess(SCHEDULE)) { // 이미 기능을 사용한 경우
+                        continue;
+                    }
+
+                    // TODO : 처음으로 기능을 사용하는 경우 실행할 로직
+
                 }
                 case STATISTIC -> {
                     System.out.println("statistic");
                 }
                 case PLACE_VOTE -> {
                     System.out.println("vote");
+
+                    if(!isFirstAccess(PLACE_VOTE)) { // 이미 기능을 사용한 경우
+                        continue;
+                    }
+
+                    // TODO : 처음으로 기능을 사용하는 경우 실행할 로직
+
                 }
                 case PLACE_SUGGESTION -> {
                     System.out.println("place-suggest");
@@ -101,5 +126,28 @@ public class ServerThread extends Thread {
                 }
             }
         }
+    }
+
+
+    private boolean isFirstAccess(ClientState state) {
+        // 처음 접속한 것이 아니라면
+        if (!checkIsFirstAccess.get(state)) {
+            try {
+                clientOutput.writeObject(false); // 첫번째 접속이 아니라는 것을 client에게 알려줌
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return false;
+        }
+
+        // 처음 접속한 것이라면
+        try {
+            clientOutput.writeObject(true); // 첫번째 접속이 맞다는 것을 client에게 알려줌
+            checkIsFirstAccess.replace(state, FALSE); // Map의 값도 변경
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return true;
     }
 }
