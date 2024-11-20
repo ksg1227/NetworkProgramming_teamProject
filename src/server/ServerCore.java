@@ -1,6 +1,7 @@
 package server;
 
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ public class ServerCore extends Thread {
     private static final Map<String, ObjectOutputStream> onPlaceSuggestClients = new HashMap<>();
     private static final Map<String, ObjectOutputStream> onChatClients = new HashMap<>();
     private static ServerSocket serverSocket = null;
+    private final PrintWriter writer = new PrintWriter(System.out, true);
 
     public ServerCore() {
         try {
@@ -24,13 +26,13 @@ public class ServerCore extends Thread {
 
     @Override
     public void run() {
-        System.out.println("Server started");
+        writer.println("Server started");
 
         while(true) {
             Socket socket = null;
 
             try {
-                System.out.println("Waiting for connection");
+                writer.println("Waiting for connection");
                 socket = serverSocket.accept();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -48,7 +50,7 @@ public class ServerCore extends Thread {
             );
             chatServerThread.start();
 
-            System.out.println("Add client");
+            writer.println("Add client");
         }
     }
 }

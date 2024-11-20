@@ -1,13 +1,19 @@
 package server;
 
+import dto.ClientState;
 import dto.Packet;
 import entity.User;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.Map;
+
+import static dto.ClientState.*;
+import static java.lang.Boolean.*;
 
 public class ServerThread extends Thread {
     private static Map<String, ObjectOutputStream> onChatClients;
@@ -18,6 +24,8 @@ public class ServerThread extends Thread {
 
     private final ObjectInputStream clientInput;
     private final ObjectOutputStream clientOutput;
+
+    private final PrintWriter writer = new PrintWriter(System.out, true);
 
     private final User client;
 
@@ -76,28 +84,29 @@ public class ServerThread extends Thread {
                 e.printStackTrace();
             }
 
+            // TODO : 각각의 기능 구현 필요
             assert packet != null;
             switch (packet.clientState()) {
                 case HOME -> {
-                    System.out.println("home");
+                    writer.println("home");
                 }
                 case CHATTING -> {
-                    System.out.println("chat");
+                    writer.println("chat");
                 }
                 case SCHEDULE -> {
-                    System.out.println("schedule");
+                    writer.println("schedule");
                 }
                 case STATISTIC -> {
-                    System.out.println("statistic");
+                    writer.println("statistic");
                 }
                 case PLACE_VOTE -> {
-                    System.out.println("vote");
+                    writer.println("vote");
                 }
                 case PLACE_SUGGESTION -> {
-                    System.out.println("place-suggest");
+                    writer.println("place-suggest");
                 }
                 case null, default -> {
-                    System.out.println("nothing");
+                    writer.println("nothing");
                 }
             }
         }
