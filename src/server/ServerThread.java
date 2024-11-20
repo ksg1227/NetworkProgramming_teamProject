@@ -103,10 +103,10 @@ public class ServerThread extends Thread {
                     writer.println("vote");
                 }
                 case PLACE_SUGGESTION -> {
-                    System.out.println("place-suggest");
+                    writer.println("place-suggest");
                 }
                 case null, default -> {
-                    System.out.println("nothing");
+                    writer.println("nothing");
                 }
             }
         }
