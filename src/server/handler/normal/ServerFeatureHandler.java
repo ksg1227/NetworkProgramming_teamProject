@@ -19,5 +19,11 @@ public abstract class ServerFeatureHandler {
         this.onFeatureClients = onFeatureClients;
     }
 
+    public ServerFeatureHandler(ObjectOutputStream clientOutput, ObjectInputStream clientInput) {
+        this.clientOutput = clientOutput;
+        this.clientInput = clientInput;
+        this.onFeatureClients = null;
+    }
+
     abstract public void run();
 }
