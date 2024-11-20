@@ -29,14 +29,18 @@ public class ClientCore extends Thread {
 
     @Override
     public void run() {
-        System.out.println("Connected to server\n");
+        writer.println("Connected to server\n");
+
+//        System.out.println("Connected to server\n");
 
         createClient();
 
         while (true) {
             showMenuScreen();
 
-            System.out.print("어떤 기능을 사용하시겠습니까? : ");
+            writer.print("어떤 기능을 사용하시겠습니까? : ");
+            writer.flush();
+
             String functionNum = scanner.nextLine();
 
             switch (functionNum) {
@@ -48,7 +52,7 @@ public class ClientCore extends Thread {
 
                     // 첫번째 접속이 아니라면
                     if (!isFirstAccess()) {
-                        System.out.println("이미 가능한 날짜에 표시하셨습니다.");
+                        writer.println("이미 가능한 날짜에 표시하셨습니다.");
                         continue;
                     }
 
@@ -69,7 +73,7 @@ public class ClientCore extends Thread {
 
                     // 이미 기능을 사용한 경우
                     if (!isFirstAccess()) {
-                        System.out.println("이미 장소 투표에 참여하셨습니다.");
+                        writer.println("이미 장소 투표에 참여하셨습니다.");
                         continue;
                     }
 
@@ -89,7 +93,7 @@ public class ClientCore extends Thread {
                     sendPacketToServer(packet);
                 }
                 default -> {
-                    System.out.println("유효하지 않은 입력입니다. 다시 선택해주세요.");
+                    writer.println("유효하지 않은 입력입니다. 다시 선택해주세요.");
                 }
             }
         }
@@ -97,7 +101,8 @@ public class ClientCore extends Thread {
     }
 
     private void createClient() {
-        System.out.print("이름 : ");
+        writer.print("이름 : ");
+        writer.flush();
 
         String userName;
         try {
@@ -133,13 +138,13 @@ public class ClientCore extends Thread {
         }
     }
 
-    static void showMenuScreen() {
-        System.out.println("========================================");
-        System.out.println("(1) : 날짜 조율 기능");
-        System.out.println("(2) : 장소 제시 기능");
-        System.out.println("(3) : 장소 투표 기능");
-        System.out.println("(4) : 일정 확인 기능");
-        System.out.println("(5) : 채팅 기능");
-        System.out.println("========================================");
+    public void showMenuScreen() {
+        writer.println("========================================");
+        writer.println("(1) : 날짜 조율 기능");
+        writer.println("(2) : 장소 제시 기능");
+        writer.println("(3) : 장소 투표 기능");
+        writer.println("(4) : 일정 확인 기능");
+        writer.println("(5) : 채팅 기능");
+        writer.println("========================================");
     }
 }

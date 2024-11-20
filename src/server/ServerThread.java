@@ -7,6 +7,7 @@ import entity.User;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +24,8 @@ public class ServerThread extends Thread {
 
     private final ObjectInputStream clientInput;
     private final ObjectOutputStream clientOutput;
+
+    private final PrintWriter writer = new PrintWriter(System.out, true);
 
     private final User client;
 
@@ -90,13 +93,13 @@ public class ServerThread extends Thread {
             assert packet != null;
             switch (packet.clientState()) {
                 case HOME -> {
-                    System.out.println("home");
+                    writer.println("home");
                 }
                 case CHATTING -> {
-                    System.out.println("chat");
+                    writer.println("chat");
                 }
                 case SCHEDULE -> {
-                    System.out.println("schedule");
+                    writer.println("schedule");
 
                     if(!isFirstAccess(SCHEDULE)) { // 이미 기능을 사용한 경우
                         continue;
@@ -106,10 +109,10 @@ public class ServerThread extends Thread {
 
                 }
                 case STATISTIC -> {
-                    System.out.println("statistic");
+                    writer.println("statistic");
                 }
                 case PLACE_VOTE -> {
-                    System.out.println("vote");
+                    writer.println("vote");
 
                     if(!isFirstAccess(PLACE_VOTE)) { // 이미 기능을 사용한 경우
                         continue;
