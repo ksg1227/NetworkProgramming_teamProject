@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class ServerVoteHandler extends ServerFeatureHandler {
     @Override
-    void run() {
+    public void run() {
 
     }
 

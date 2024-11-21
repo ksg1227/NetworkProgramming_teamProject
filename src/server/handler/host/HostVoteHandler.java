@@ -12,4 +12,9 @@ public class HostVoteHandler extends ServerVoteHandler {
     public HostVoteHandler(ObjectInputStream clientInput, ObjectOutputStream clientOutput, Map<String, ObjectOutputStream> onFeatureClients) {
         super(clientInput, clientOutput, onFeatureClients);
     }
+
+    @Override
+    public void run() {
+        super.run();
+    }
 }

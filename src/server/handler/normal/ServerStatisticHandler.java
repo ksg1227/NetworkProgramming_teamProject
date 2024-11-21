@@ -9,7 +9,7 @@ public class ServerStatisticHandler extends ServerFeatureHandler {
     }
 
     @Override
-    void run() {
+    public void run() {
 
     }
 }

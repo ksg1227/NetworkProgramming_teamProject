@@ -13,7 +13,7 @@ public class ServerChatHandler extends ServerFeatureHandler {
     }
 
     public void broadcast(String message) {
-        Map<String, ObjectOutputStream> onChatClients = this.getOnFeatureClients();
+        Map<String, ObjectOutputStream> onChatClients = onFeatureClients;
 
         synchronized (onChatClients) {
             Collection<ObjectOutputStream> collection = onChatClients.values();
@@ -28,7 +28,7 @@ public class ServerChatHandler extends ServerFeatureHandler {
     }
 
     @Override
-    void run() {
+    public void run() {
 
     }
 }

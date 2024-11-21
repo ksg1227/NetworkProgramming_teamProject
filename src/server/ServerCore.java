@@ -40,7 +40,7 @@ public class ServerCore extends Thread {
 
             assert socket != null;
 
-            ServerThread chatServerThread = new ServerThread(
+            ServerThread serverThread = new ServerThread(
                     socket,
                     onChatClients,
                     onScheduleClients,
@@ -48,9 +48,7 @@ public class ServerCore extends Thread {
                     onVoteClients,
                     onPlaceSuggestClients
             );
-            chatServerThread.start();
-
-            writer.println("Add client");
+            serverThread.start();
         }
     }
 }
