@@ -104,10 +104,18 @@ public class ServerThread extends Thread {
                     writer.println("statistic");
                 }
                 case PLACE_VOTE -> {
-                    writer.println("vote");
+                    onVoteClients.put(user.getUserName(), clientOutput);
+                    if(user.isHost()) {
+                        new HostVoteHandler(clientInput, clientOutput, onVoteClients, user).run();
+                    } else {
+                        new ServerVoteHandler(clientInput, clientOutput, onVoteClients, user).run();
+                    }
+                    onVoteClients.remove(user.getUserName());
                 }
                 case PLACE_SUGGESTION -> {
-                    writer.println("place-suggest");
+                    onPlaceSuggestClients.put(user.getUserName(), clientOutput);
+                    new ServerPlaceSuggestHandler(clientInput, clientOutput, onPlaceSuggestClients).run();
+                    onPlaceSuggestClients.remove(user.getUserName());
                 }
                 case null, default -> {
                     writer.println("nothing");
