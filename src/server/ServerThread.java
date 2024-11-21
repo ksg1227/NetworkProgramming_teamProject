@@ -49,31 +49,15 @@ public class ServerThread extends Thread {
             throw new RuntimeException(e);
         }
 
-
-        try {
-            String userName = (String) clientInput.readObject();
-
-            user = new User(userName);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-
-        if (ClientOrderGenerator.getClientOrder() == 1) {
-            user.setHost(true);
-        }
-
-        try {
-            clientOutput.writeObject(user);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        user = new User(ClientOrderGenerator.getClientOrder() == 1);
     }
 
-    // 채팅 기능을 관리하는 스레드
     @Override
     public void run() {
+        setUserName();
+
+        notifyUserInfoToClient();
+
         Integer EMPTY_BODY = 0;
 
         System.out.println(user.getUserName() + " joined");
@@ -121,6 +105,26 @@ public class ServerThread extends Thread {
                     writer.println("nothing");
                 }
             }
+        }
+    }
+
+    private void notifyUserInfoToClient() {
+        try {
+            clientOutput.writeObject(user);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void setUserName() {
+        try {
+            String userName = (String) clientInput.readObject();
+
+            user.setUserName(userName);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 }

@@ -6,12 +6,12 @@ public class User implements Serializable {
     private String userName;
     private boolean isHost;
 
-    public User(String userName) {
-        this.userName = userName;
-        this.isHost = false;
+    public User(boolean isHost) {
+        this.isHost = isHost;
     }
-    public void setHost(boolean host) {
-        isHost = host;
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     @Override
