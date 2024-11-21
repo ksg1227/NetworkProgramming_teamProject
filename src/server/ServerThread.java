@@ -4,6 +4,7 @@ import dto.ClientState;
 import dto.Packet;
 import entity.User;
 import server.handler.normal.ServerPlaceSuggestHandler;
+import server.handler.normal.ServerVoteHandler;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -28,7 +29,7 @@ public class ServerThread extends Thread {
 
     private final PrintWriter writer = new PrintWriter(System.out, true);
 
-    private final User client;
+    private final User user;
 
     public ServerThread(
             Socket socket,
@@ -56,7 +57,7 @@ public class ServerThread extends Thread {
         try {
             String userName = (String) clientInput.readObject();
 
-            client = new User(userName);
+            user = new User(userName);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
@@ -64,11 +65,11 @@ public class ServerThread extends Thread {
         }
 
         if (ClientOrderGenerator.getClientOrder() == 1) {
-            client.setHost(true);
+            user.setHost(true);
         }
 
         try {
-            clientOutput.writeObject(client);
+            clientOutput.writeObject(user);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
