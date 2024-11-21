@@ -1,13 +1,12 @@
 package client;
 
+import dto.ClientState;
 import dto.Packet;
 import entity.User;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
-
-import static dto.ClientState.*;
 
 public class ClientCore extends Thread {
     private Socket socket;
@@ -29,9 +28,13 @@ public class ClientCore extends Thread {
 
     @Override
     public void run() {
-        writer.println("Connected to server\n");
+        writer.println("Connected to server");
 
         createClient();
+
+        writer.println(client+ " connected");
+
+        ClientState state = ClientState.HOME;
 
         while (true) {
             showMenuScreen();
@@ -77,8 +80,7 @@ public class ClientCore extends Thread {
     }
 
     private void createClient() {
-        writer.print("이름 : ");
-        writer.flush();
+        writer.println("Enter name");
 
         String userName;
         try {
