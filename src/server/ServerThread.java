@@ -1,8 +1,8 @@
 package server;
 
-import dto.ClientState;
 import dto.Packet;
 import entity.User;
+import server.handler.host.HostVoteHandler;
 import server.handler.normal.ServerPlaceSuggestHandler;
 import server.handler.normal.ServerVoteHandler;
 
@@ -11,11 +11,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.Map;
-
-import static dto.ClientState.*;
-import static java.lang.Boolean.*;
 
 public class ServerThread extends Thread {
     private static Map<String, ObjectOutputStream> onChatClients;
@@ -78,17 +74,22 @@ public class ServerThread extends Thread {
     // 채팅 기능을 관리하는 스레드
     @Override
     public void run() {
-        Packet<Object> packet = null;
+        Integer EMPTY_BODY = 0;
+
+        System.out.println(user.getUserName() + " joined");
+        Packet<Integer> packet = null;
 
         while (!currentThread().isInterrupted()) {
             try {
-                packet = (Packet<Object>) clientInput.readObject();
+                packet = (Packet<Integer>) clientInput.readObject();
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
             // TODO : 각각의 기능 구현 필요
             assert packet != null;
+            assert packet.body().equals(EMPTY_BODY);
+
             switch (packet.clientState()) {
                 case HOME -> {
                     writer.println("home");
