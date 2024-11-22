@@ -49,9 +49,12 @@ public class ServerVoteHandler extends ServerFeatureHandler {
             clientOutput.writeObject(new Packet<String>(ClientState.PLACE_VOTE, "You can't vote again"));
             return;
         }
-        if(!places.contains(place)) {
-            clientOutput.writeObject(new Packet<String>(ClientState.PLACE_VOTE, "You voted to the place that doesn't exist"));
-            return;
+
+        synchronized (places) {
+            if(!places.contains(place)) {
+                clientOutput.writeObject(new Packet<String>(ClientState.PLACE_VOTE, "You voted to the place that doesn't exist"));
+                return;
+            }
         }
         votes.put(user, place);
 

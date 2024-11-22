@@ -3,7 +3,9 @@ package server.handler.normal;
 import dto.ClientState;
 import dto.Packet;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -56,7 +58,9 @@ public class ServerPlaceSuggestHandler extends ServerFeatureHandler {
     }
 
     private boolean doesPlaceExist(String place) {
-        return places.contains(place);
+        synchronized (places) {
+            return places.contains(place);
+        }
     }
 
     private Packet<String> createPacket(String place) {
