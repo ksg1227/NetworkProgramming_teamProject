@@ -13,12 +13,11 @@ public class ServerVoteHandler extends ServerFeatureHandler {
     protected final User user;
     protected static final HashMap<User, String> votes = new HashMap<>();
     protected static Boolean isVoting = false;
-    private HashSet<String> places = null;
+    private final HashSet<String> places = ServerPlaceSuggestHandler.getPlaces();;
 
     public ServerVoteHandler(ObjectInputStream clientInput, ObjectOutputStream clientOutput, Map<String, ObjectOutputStream> onFeatureClients, User user) {
         super(clientInput, clientOutput, onFeatureClients);
         this.user = user;
-        this.places = new ServerPlaceSuggestHandler(clientOutput, clientInput).getPlaces();
     }
 
     @Override

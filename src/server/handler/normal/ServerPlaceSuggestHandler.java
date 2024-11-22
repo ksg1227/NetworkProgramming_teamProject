@@ -68,7 +68,7 @@ public class ServerPlaceSuggestHandler extends ServerFeatureHandler {
         clientOutput.flush();
     }
 
-    public HashSet<String> getPlaces() {
+    public static HashSet<String> getPlaces() {
         return places;
     }
 }
