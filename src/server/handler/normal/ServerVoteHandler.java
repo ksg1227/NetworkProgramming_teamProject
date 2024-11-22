@@ -4,14 +4,16 @@ import dto.ClientState;
 import dto.Packet;
 import entity.User;
 
-import java.io.*;
-import java.util.HashMap;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerVoteHandler extends ServerFeatureHandler {
     protected final User user;
-    protected static final HashMap<User, String> votes = new HashMap<>();
+    protected static final ConcurrentHashMap<User, String> votes = new ConcurrentHashMap<>();
     protected static Boolean isVoting = false;
     private final HashSet<String> places = ServerPlaceSuggestHandler.getPlaces();;
 

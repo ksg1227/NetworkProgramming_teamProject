@@ -11,14 +11,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerThread extends Thread {
-    private static Map<String, ObjectOutputStream> onChatClients;
-    private static Map<String, ObjectOutputStream> onScheduleClients;
-    private static Map<String, ObjectOutputStream> onStatisticClients;
-    private static Map<String, ObjectOutputStream> onVoteClients;
-    private static Map<String, ObjectOutputStream> onPlaceSuggestClients;
+    private static ConcurrentHashMap<String, ObjectOutputStream> onChatClients;
+    private static ConcurrentHashMap<String, ObjectOutputStream> onScheduleClients;
+    private static ConcurrentHashMap<String, ObjectOutputStream> onStatisticClients;
+    private static ConcurrentHashMap<String, ObjectOutputStream> onVoteClients;
+    private static ConcurrentHashMap<String, ObjectOutputStream> onPlaceSuggestClients;
 
     private final ObjectInputStream clientInput;
     private final ObjectOutputStream clientOutput;
@@ -29,11 +29,11 @@ public class ServerThread extends Thread {
 
     public ServerThread(
             Socket socket,
-            Map<String, ObjectOutputStream> onChatClients,
-            Map<String, ObjectOutputStream> onScheduleClients,
-            Map<String, ObjectOutputStream> onStatisticClients,
-            Map<String, ObjectOutputStream> onVoteClients,
-            Map<String, ObjectOutputStream> onPlaceSuggestClients
+            ConcurrentHashMap<String, ObjectOutputStream> onChatClients,
+            ConcurrentHashMap<String, ObjectOutputStream> onScheduleClients,
+            ConcurrentHashMap<String, ObjectOutputStream> onStatisticClients,
+            ConcurrentHashMap<String, ObjectOutputStream> onVoteClients,
+            ConcurrentHashMap<String, ObjectOutputStream> onPlaceSuggestClients
     ) {
         ServerThread.onChatClients = onChatClients;
         ServerThread.onScheduleClients = onScheduleClients;
