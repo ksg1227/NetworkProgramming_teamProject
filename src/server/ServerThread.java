@@ -2,10 +2,12 @@ package server;
 
 import dto.Packet;
 import entity.User;
+import server.handler.normal.ServerChatHandler;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Map;
 
@@ -19,6 +21,7 @@ public class ServerThread extends Thread {
     private final ObjectInputStream clientInput;
     private final ObjectOutputStream clientOutput;
 
+    private final PrintWriter writer = new PrintWriter(System.out, true);
     private final User client;
 
     public ServerThread(
@@ -82,7 +85,13 @@ public class ServerThread extends Thread {
                     System.out.println("home");
                 }
                 case CHATTING -> {
-                    System.out.println("chat");
+                    synchronized (onChatClients) {
+                        onChatClients.put(client.getUserName(),clientOutput);
+                    }
+                    new ServerChatHandler(clientInput,clientOutput,onChatClients,client).run();
+                    synchronized (onChatClients) {
+                        onChatClients.remove(client.getUserName());
+                    }
                 }
                 case SCHEDULE -> {
                     System.out.println("schedule");

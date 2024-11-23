@@ -1,5 +1,8 @@
 package client;
 
+import client.handler.ClientChatHandler;
+import dto.ClientState;
+import dto.Packet;
 import entity.User;
 
 import java.io.*;
@@ -26,14 +29,50 @@ public class ClientCore extends Thread {
 
     @Override
     public void run() {
-        System.out.println("Connected to server\n");
+        writer.println("Connected to server\n");
 
         createClient();
 
-        System.out.println(client+ " connected");
+        writer.println(client+ " connected");
 
+        ClientState state = ClientState.HOME;
         while (true) {
+            writer.println("Select feature");
+            writer.println("[1]. Enter chat");
+            writer.println("[2]. Enter schedule");
+            writer.println("[3]. Suggest place");
+            writer.println("[4]. Vote place");
+            writer.println("[5]. Show statistic");
 
+            state = setState();
+            try{
+                notifyState(state);
+            }catch (IOException e){
+                throw new RuntimeException(e);
+            }
+            switch (state) {
+                case HOME -> {
+                    writer.println("home");
+                }
+                case CHATTING -> {
+                    new ClientChatHandler(serverInput,serverOutput,client).run();
+                }
+                case SCHEDULE -> {
+                    writer.println("schedule");
+                }
+                case STATISTIC -> {
+                    writer.println("statistic");
+                }
+                case PLACE_VOTE -> {
+                    writer.println("place vote");
+                }
+                case PLACE_SUGGESTION -> {
+                    writer.println("place suggestion");
+                }
+                case null, default -> {
+                    writer.println("unknown");
+                }
+            }
         }
 
     }
@@ -58,5 +97,34 @@ public class ClientCore extends Thread {
             throw new RuntimeException(e);
         }
 
+    }
+    private void notifyState(ClientState state) throws IOException {
+        Packet<Integer> packet = new Packet<>(state, 0);
+        serverOutput.writeObject(packet);
+        serverOutput.flush();
+    }
+    private ClientState setState() {
+        String input = scanner.nextLine();
+
+        switch (input) {
+            case "chat", "1" -> {
+                return ClientState.CHATTING;
+            }
+            case "schedule", "2" -> {
+                return ClientState.SCHEDULE;
+            }
+            case "place-suggest", "3" -> {
+                return ClientState.PLACE_SUGGESTION;
+            }
+            case "place-vote", "4" -> {
+                return ClientState.PLACE_VOTE;
+            }
+            case "statistic", "5" -> {
+                return ClientState.STATISTIC;
+            }
+            case null, default ->  {
+                return ClientState.HOME;
+            }
+        }
     }
 }

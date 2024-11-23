@@ -5,9 +5,9 @@ import java.io.ObjectOutputStream;
 import java.util.Map;
 
 public abstract class ServerFeatureHandler {
-    private final ObjectInputStream clientInput;
-    private final ObjectOutputStream clientOutput;
-    private final Map<String, ObjectOutputStream> onFeatureClients;
+    protected final ObjectInputStream clientInput;
+    protected final ObjectOutputStream clientOutput;
+    protected final Map<String, ObjectOutputStream> onFeatureClients;
 
     public ServerFeatureHandler(
             ObjectInputStream clientInput,

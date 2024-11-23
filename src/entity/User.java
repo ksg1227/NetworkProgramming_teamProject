@@ -11,6 +11,10 @@ public class User implements Serializable {
         this.isHost = false;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
     public boolean getHost() {
         return isHost;
     }
