@@ -33,9 +33,9 @@ public class ClientChatHandler extends ClientFeatureHandler{
                 while(true){
                     Chat receivedChat = (Chat) serverInput.readObject();
                     writer.printf("%s : %s - %s%n",
-                            receivedChat.getUserName(),
-                            receivedChat.getMessage(),
-                            receivedChat.getTimeStamp());
+                                receivedChat.getUserName(),
+                                receivedChat.getMessage(),
+                                receivedChat.getTimeStamp());
                 }
             }catch (Exception e){
                 writer.println("서버와 연결이 끊어졌습니다.");
