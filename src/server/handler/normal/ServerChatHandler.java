@@ -1,31 +1,26 @@
 package server.handler.normal;
 
-import dto.ClientState;
-import dto.Packet;
 import entity.Chat;
 import entity.User;
 
 import java.io.*;
-import java.sql.Date;
-import java.time.LocalDate;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class ServerChatHandler extends ServerFeatureHandler {
     protected final User client;
-    private PrintWriter pw;
-    private BufferedReader br;
+    private static final int MAX_RECENT_CHAT = 10;
+    private static final Deque<Chat> recentChats = new LinkedList<>();
     public ServerChatHandler(ObjectInputStream clientInput, ObjectOutputStream clientOutput, Map<String, ObjectOutputStream> onFeatureClients,User client) {
         super(clientInput, clientOutput, onFeatureClients);
         this.client = client;
-        try{
-            br = new BufferedReader(new InputStreamReader(clientInput));
-            pw = new PrintWriter(new OutputStreamWriter(clientOutput));
-
-        } catch (Exception e){}
     }
-
     public void broadcast(Chat chat) {
+        saveChats(chat);
         Map<String, ObjectOutputStream> onChatClients = this.getOnFeatureClients();
 
         synchronized (onChatClients) {
@@ -42,18 +37,47 @@ public class ServerChatHandler extends ServerFeatureHandler {
         }
     }
 
+    private void showRecentChats() {
+        try {
+            synchronized (recentChats) {
+                for (Chat chat : recentChats) {
+                    clientOutput.writeObject(chat);
+                }
+                clientOutput.flush();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private void saveChats(Chat chat) {
+        synchronized (recentChats) {
+            if (recentChats.size() >= MAX_RECENT_CHAT) {
+                recentChats.pollFirst(); // 가장 오래된 메시지 제거
+            }
+
+            if(!chat.getUserName().equals("Server")){ //클라이언트 입장 메시지는 저장 안 함
+                recentChats.addLast(chat);
+            }
+
+        }
+    }
+
 
 
     @Override
     public void run() {
+          broadcast(new Chat("Server",
+                  client.getUserName()+"님이 채팅방에 입장하셨습니다.",
+                  Timestamp.valueOf(LocalDateTime.now())));
         try {
+            showRecentChats();
             while (true) {
-                // 클라이언트로부터 Chat 객체 수신
                 Chat receivedChat = (Chat) clientInput.readObject();
 
                 if (receivedChat.getMessage().equalsIgnoreCase("/q")) {
-                    // 클라이언트가 채팅방을 나갔을 경우 처리
-                    System.out.println(client.getUserName() + " has left the chat.");
+                    broadcast(new Chat("Server",
+                            client.getUserName()+"님이 채팅방에서 나가셨습니다.",
+                            Timestamp.valueOf(LocalDateTime.now())));
                     break;
                 }
 
@@ -64,11 +88,13 @@ public class ServerChatHandler extends ServerFeatureHandler {
             System.out.println("Connection lost with: " + client.getUserName());
             e.printStackTrace();
         } finally {
-            // 연결 종료 시 클라이언트 제거
+
             synchronized (getOnFeatureClients()) {
                 getOnFeatureClients().remove(client.getUserName());
             }
-            System.out.println(client.getUserName() + " has been removed from the chat.");
+            broadcast(new Chat("Server",
+                    client.getUserName()+"님의 연결이 종료되었습니다.",
+                    Timestamp.valueOf(LocalDateTime.now())));
         }
     }
 
