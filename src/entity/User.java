@@ -6,21 +6,12 @@ public class User implements Serializable {
     private String userName;
     private boolean isHost;
 
-    public User(String userName) {
+    public User(boolean isHost) {
+        this.isHost = isHost;
+    }
+
+    public void setUserName(String userName) {
         this.userName = userName;
-        this.isHost = false;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public boolean getHost() {
-        return isHost;
-    }
-
-    public void setHost(boolean host) {
-        isHost = host;
     }
 
     @Override
@@ -29,5 +20,13 @@ public class User implements Serializable {
                 "userName='" + userName + '\'' +
                 ", isHost=" + isHost +
                 '}';
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public boolean isHost() {
+        return isHost;
     }
 }
