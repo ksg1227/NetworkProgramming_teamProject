@@ -1,6 +1,8 @@
 package client;
 
 import client.handler.ClientChatHandler;
+import client.handler.ClientPlaceSuggestHandler;
+import client.handler.ClientVoteHandler;
 import dto.ClientState;
 import dto.Packet;
 import entity.User;
@@ -10,7 +12,6 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class ClientCore extends Thread {
-    private Socket socket;
     private ObjectOutputStream serverOutput;
     private ObjectInputStream serverInput;
     private final Scanner scanner = new Scanner(System.in);
@@ -19,8 +20,9 @@ public class ClientCore extends Thread {
 
     public ClientCore() {
         try {
-            socket = new Socket("localhost", 10000);
+            Socket socket = new Socket("localhost", 10000);
             serverOutput = new ObjectOutputStream(socket.getOutputStream());
+            serverOutput.flush();
             serverInput = new ObjectInputStream(socket.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
@@ -29,12 +31,10 @@ public class ClientCore extends Thread {
 
     @Override
     public void run() {
-        writer.println("Connected to server\n");
-
+        writer.println("Connected to server");
         createClient();
 
         writer.println(client+ " connected");
-
         ClientState state = ClientState.HOME;
         while (true) {
             writer.println("Select feature");
@@ -45,9 +45,10 @@ public class ClientCore extends Thread {
             writer.println("[5]. Show statistic");
 
             state = setState();
-            try{
+
+            try {
                 notifyState(state);
-            }catch (IOException e){
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
             switch (state) {
@@ -64,22 +65,26 @@ public class ClientCore extends Thread {
                     writer.println("statistic");
                 }
                 case PLACE_VOTE -> {
-                    writer.println("place vote");
+                    new ClientVoteHandler(serverInput, serverOutput, client).run();
                 }
                 case PLACE_SUGGESTION -> {
-                    writer.println("place suggestion");
+                    new ClientPlaceSuggestHandler(serverInput, serverOutput).run();
                 }
                 case null, default -> {
                     writer.println("unknown");
                 }
             }
         }
-
     }
 
+    private void notifyState(ClientState state) throws IOException {
+        Packet<Integer> packet = new Packet<>(state, 0);
+        serverOutput.writeObject(packet);
+        serverOutput.flush();
+    }
 
     private void createClient() {
-        System.out.print("이름 : ");
+        writer.println("Enter name");
 
         String userName;
         try {
@@ -96,13 +101,8 @@ public class ClientCore extends Thread {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
 
-    }
-    private void notifyState(ClientState state) throws IOException {
-        Packet<Integer> packet = new Packet<>(state, 0);
-        serverOutput.writeObject(packet);
-        serverOutput.flush();
-    }
     private ClientState setState() {
         String input = scanner.nextLine();
 
@@ -127,4 +127,5 @@ public class ClientCore extends Thread {
             }
         }
     }
+
 }

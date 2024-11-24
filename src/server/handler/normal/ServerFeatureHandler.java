@@ -14,8 +14,8 @@ public abstract class ServerFeatureHandler {
             ObjectOutputStream clientOutput,
             Map<String, ObjectOutputStream> onFeatureClients
     ) {
-        this.clientInput = clientInput;
         this.clientOutput = clientOutput;
+        this.clientInput = clientInput;
         this.onFeatureClients = onFeatureClients;
     }
 
@@ -24,10 +24,8 @@ public abstract class ServerFeatureHandler {
         this.clientInput = clientInput;
         this.onFeatureClients = null;
     }
-
-    abstract public void run();
-
     public Map<String, ObjectOutputStream> getOnFeatureClients() {
         return onFeatureClients;
     }
+    abstract public void run();
 }

@@ -9,7 +9,7 @@ public class ServerScheduleHandler extends ServerFeatureHandler {
     }
 
     @Override
-    void run() {
+    public void run() {
 
     }
 }

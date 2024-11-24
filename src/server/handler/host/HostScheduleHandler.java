@@ -12,4 +12,9 @@ public class HostScheduleHandler extends ServerScheduleHandler {
     public HostScheduleHandler(ObjectInputStream clientInput, ObjectOutputStream clientOutput, Map<String, ObjectOutputStream> onFeatureClients) {
         super(clientInput, clientOutput, onFeatureClients);
     }
+
+    @Override
+    public void run() {
+        super.run();
+    }
 }

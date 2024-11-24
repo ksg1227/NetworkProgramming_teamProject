@@ -26,6 +26,7 @@ public class ClientVoteHandler extends ClientFeatureHandler {
                 vote();
             }
         } catch (Exception e) {}
+
     }
 
     private void handleHost() throws IOException, ClassNotFoundException {
@@ -81,4 +82,5 @@ public class ClientVoteHandler extends ClientFeatureHandler {
         Packet<String> response = (Packet<String>)serverInput.readObject();
         writer.println(response.body());
     }
+
 }
