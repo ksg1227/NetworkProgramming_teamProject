@@ -6,6 +6,7 @@ import dto.Packet;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.HashSet;
 
 public class ClientPlaceSuggestHandler extends ClientFeatureHandler {
     public ClientPlaceSuggestHandler(ObjectInputStream serverInput, ObjectOutputStream serverOutput) {
@@ -14,6 +15,17 @@ public class ClientPlaceSuggestHandler extends ClientFeatureHandler {
 
     @Override
     public void run() {
+        HashSet<String> places = null;
+        try {
+            Packet<HashSet<String>> packet = (Packet<HashSet<String>>) serverInput.readObject();
+            places = packet.body();
+            for (String place : places) {
+                writer.println(place);
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
         writer.println("Enter the place you want to add.");
         writer.println("[exit] to go to home");
 

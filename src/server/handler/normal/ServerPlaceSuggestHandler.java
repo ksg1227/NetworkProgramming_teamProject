@@ -16,14 +16,14 @@ public class ServerPlaceSuggestHandler extends ServerFeatureHandler {
         super(clientInput, clientOutput, onFeatureClients);
     }
 
-    public ServerPlaceSuggestHandler(ObjectOutputStream clientOutput, ObjectInputStream clientInput) {
-        super(clientOutput, clientInput);
-    }
-
     @Override
     public void run() {
         String place = null;
         Packet<String> packet = null;
+
+        try {
+            clientOutput.writeObject(new Packet<>(ClientState.PLACE_SUGGESTION, new HashSet(places)));
+        } catch (Exception e) {}
 
         try {
             place = getRequest();
@@ -73,6 +73,6 @@ public class ServerPlaceSuggestHandler extends ServerFeatureHandler {
     }
 
     public static HashSet<String> getPlaces() {
-        return places;
+        return new HashSet<>(places);
     }
 }
