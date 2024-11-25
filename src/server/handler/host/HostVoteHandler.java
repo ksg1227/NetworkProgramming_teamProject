@@ -1,7 +1,7 @@
 package server.handler.host;
 
 import dto.ClientState;
-import dto.HostVoteAction;
+import dto.HostElectionAction;
 import dto.Packet;
 import entity.User;
 import server.handler.normal.ServerVoteHandler;
@@ -16,10 +16,10 @@ public class HostVoteHandler extends ServerVoteHandler {
 
     @Override
     public void run() {
-        HostVoteAction action = null;
+        HostElectionAction action = null;
 
         try {
-            Packet<HostVoteAction> packet = (Packet<HostVoteAction>) clientInput.readObject();
+            Packet<HostElectionAction> packet = (Packet<HostElectionAction>) clientInput.readObject();
 
             assert packet.clientState().equals(ClientState.PLACE_VOTE);
             action = packet.body();

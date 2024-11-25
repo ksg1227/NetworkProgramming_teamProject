@@ -1,6 +1,6 @@
 package dto;
 
-public enum HostVoteAction {
+public enum HostElectionAction {
     START,
     END,
     VOTE
