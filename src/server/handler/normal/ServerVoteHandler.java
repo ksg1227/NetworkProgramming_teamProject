@@ -33,32 +33,37 @@ public class ServerVoteHandler extends ServerFeatureHandler {
 
     private void vote() throws IOException, ClassNotFoundException {
         // 1. 투표가 진행중인지 확인
-        clientOutput.writeObject(new Packet<Boolean>(ClientState.PLACE_VOTE, isVoting));
+        sendResponse(isVoting);
 
         if(!isVoting) {
             return;
         }
 
         // 2. 장소 목록 공유
-        clientOutput.writeObject(places);
+        sendResponse(places);
+        System.out.println("Send " + places + " to " + user.getUserName());
 
         // 3. 투표 결과 전송
         String place = (String) clientInput.readObject();
 
         if(votes.containsKey(user)) {
-            clientOutput.writeObject(new Packet<String>(ClientState.PLACE_VOTE, "You can't vote again"));
+            sendResponse("You can't vote again");
             return;
         }
 
         synchronized (places) {
             if(!places.contains(place)) {
-                clientOutput.writeObject(new Packet<String>(ClientState.PLACE_VOTE, "You voted to the place that doesn't exist"));
+                sendResponse("You voted to the place that doesn't exist");
                 return;
             }
         }
         votes.put(user, place);
 
         // 4. 투표 결과 처리
-        clientOutput.writeObject(new Packet<String>(ClientState.PLACE_VOTE, "You've voted to " + place));
+        sendResponse("You've voted to " + place);
+    }
+
+    private void sendResponse(Object body) throws IOException {
+        clientOutput.writeObject(new Packet<>(ClientState.PLACE_VOTE, body));
     }
 }
