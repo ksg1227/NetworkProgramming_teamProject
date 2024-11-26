@@ -19,6 +19,32 @@ public class ClientChatHandler extends ClientFeatureHandler {
     public void run() {
         writer.println("채팅방에 입장하였습니다. (/q를 입력하여 퇴장)");
 
+        Thread receiverThread = createReceiverThread();
+
+        try {
+            while (true) {
+                String inputMsg = scanner.nextLine();
+                if (inputMsg.equalsIgnoreCase("/q")) {
+                    writer.println("채팅방을 나갑니다.");
+                    Chat disconnectMessage = new Chat(client.getUserName(), "/q", Timestamp.valueOf(LocalDateTime.now()));
+                    serverOutput.writeObject(disconnectMessage);
+                    serverOutput.flush();
+                    break;
+                }
+                Chat chat = new Chat(client.getUserName(), inputMsg, Timestamp.valueOf(LocalDateTime.now()));
+
+                serverOutput.writeObject(chat);
+                serverOutput.flush();
+            }
+        } catch (IOException e) {
+            writer.println("채팅 도중 오류가 발생했습니다.");
+            e.printStackTrace();
+        } finally {
+            receiverThread.interrupt();
+        }
+    }
+
+    private Thread createReceiverThread() {
         Thread receiverThread = new Thread(() -> {
             try {
                 while (!Thread.currentThread().isInterrupted()) {
@@ -39,28 +65,6 @@ public class ClientChatHandler extends ClientFeatureHandler {
         });
 
         receiverThread.start();
-
-        try {
-            while (true) {
-                String inputMsg = scanner.nextLine();
-                if (inputMsg.equalsIgnoreCase("/q")) {
-                    writer.println("채팅방을 나갑니다.");
-                    Chat disconnectMessage = new Chat(client.getUserName(), "/q", Timestamp.valueOf(LocalDateTime.now()));
-                    serverOutput.writeObject(disconnectMessage);
-                    serverOutput.flush();
-                    break;
-                }
-                Timestamp nowTimeStamp = Timestamp.valueOf(LocalDateTime.now());
-                Chat chat = new Chat(client.getUserName(), inputMsg, nowTimeStamp);
-
-                serverOutput.writeObject(chat);
-                serverOutput.flush();
-            }
-        } catch (IOException e) {
-            writer.println("채팅 도중 오류가 발생했습니다.");
-            e.printStackTrace();
-        } finally {
-            receiverThread.interrupt();
-        }
+        return receiverThread;
     }
 }
