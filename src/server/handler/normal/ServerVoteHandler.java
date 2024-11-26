@@ -39,17 +39,15 @@ public class ServerVoteHandler extends ServerFeatureHandler {
             return;
         }
 
-        // 2. 장소 목록 공유
+        // 2. 이미 투표했는지 확인
+        sendResponse(votes.containsKey(user));
+
+        // 3. 장소 목록 공유
         sendResponse(places);
         System.out.println("Send " + places + " to " + user.getUserName());
 
-        // 3. 투표 결과 전송
+        // 4. 투표 결과 전송
         String place = (String) clientInput.readObject();
-
-        if(votes.containsKey(user)) {
-            sendResponse("You can't vote again");
-            return;
-        }
 
         synchronized (places) {
             if(!places.contains(place)) {
@@ -59,7 +57,7 @@ public class ServerVoteHandler extends ServerFeatureHandler {
         }
         votes.put(user, place);
 
-        // 4. 투표 결과 처리
+        // 5. 투표 결과 처리
         sendResponse("You've voted to " + place);
     }
 

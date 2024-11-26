@@ -41,9 +41,11 @@ public class ClientVoteHandler extends ClientFeatureHandler {
                 return;
             case "1":
                 serverOutput.writeObject(new Packet<HostElectionAction>(ClientState.PLACE_VOTE, HostElectionAction.START));
+                writer.println("Started election");
                 break;
             case "2":
                 serverOutput.writeObject(new Packet<HostElectionAction>(ClientState.PLACE_VOTE, HostElectionAction.END));
+                writer.println("Finished election");
                 break;
             case "3":
                 serverOutput.writeObject(new Packet<HostElectionAction>(ClientState.PLACE_VOTE, HostElectionAction.VOTE));
@@ -59,15 +61,20 @@ public class ClientVoteHandler extends ClientFeatureHandler {
             writer.println("Vote had not started");
             return;
         }
+        // 2. 이미 투표했는지 확인
+        if(hasAlreadyVoted()) {
+            writer.println("You can't vote again");
+            return;
+        }
 
-        // 2. 장소 목록 출력
+        // 3. 장소 목록 출력
         showPlaces();
 
-        // 3. 투표 결과 전송
+        // 4. 투표 결과 전송
         String input = scanner.nextLine();
         serverOutput.writeObject(input);
 
-        // 4. 투표 결과 처리
+        // 5. 투표 결과 처리
         Packet<String> response = (Packet<String>)serverInput.readObject();
         writer.println(response.body());
     }
@@ -90,5 +97,14 @@ public class ClientVoteHandler extends ClientFeatureHandler {
         for(String place : places){
             writer.println(place);
         }
+    }
+
+    private boolean hasAlreadyVoted() throws IOException, ClassNotFoundException {
+        Boolean hasAlreadyVoted = false;
+
+        Packet<Boolean> packet = (Packet<Boolean>) serverInput.readObject();
+        hasAlreadyVoted = packet.body();
+
+        return hasAlreadyVoted;
     }
 }
