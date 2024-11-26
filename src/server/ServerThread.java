@@ -80,13 +80,7 @@ public class ServerThread extends Thread {
                     System.out.println("home");
                 }
                 case CHATTING -> {
-                    synchronized (onChatClients) {
-                        onChatClients.put(user.getUserName(),clientOutput);
-                    }
                     new ServerChatHandler(clientInput,clientOutput,onChatClients,user).run();
-                    synchronized (onChatClients) {
-                        onChatClients.remove(user.getUserName());
-                    }
                 }
                 case SCHEDULE -> {
                     System.out.println("schedule");

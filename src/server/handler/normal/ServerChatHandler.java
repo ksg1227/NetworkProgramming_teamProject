@@ -64,6 +64,7 @@ public class ServerChatHandler extends ServerFeatureHandler {
 
     @Override
     public void run() {
+        this.getOnFeatureClients().put(client.getUserName(), clientOutput);
         broadcast(new Chat("Server",
                 client.getUserName() + "님이 채팅방에 입장하셨습니다.",
                 Timestamp.valueOf(LocalDateTime.now())));
@@ -77,9 +78,11 @@ public class ServerChatHandler extends ServerFeatureHandler {
 
                 if (receivedObject instanceof Chat receivedChat) {
                     if (receivedChat.getMessage().equals("/q")) {
+                        this.getOnFeatureClients().remove(client.getUserName());
                         broadcast(new Chat("Server",
                                 client.getUserName() + "님이 채팅방에서 나가셨습니다.",
                                 Timestamp.valueOf(LocalDateTime.now())));
+
                         break;
                     }
                     broadcast(receivedChat);
