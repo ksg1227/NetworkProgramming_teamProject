@@ -41,6 +41,7 @@ public class HostVoteHandler extends ServerVoteHandler {
     }
 
     private void startElection() {
+        votes.clear();
         isVoting = true;
     }
 
