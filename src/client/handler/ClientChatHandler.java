@@ -4,64 +4,63 @@ import entity.Chat;
 import entity.User;
 
 import java.io.*;
-import java.sql.Date;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class ClientChatHandler extends ClientFeatureHandler{
-    private BufferedReader br;
-    private PrintWriter pw;
-    private User client;
+public class ClientChatHandler extends ClientFeatureHandler {
+    private final User client;
+
     public ClientChatHandler(ObjectInputStream serverInput, ObjectOutputStream serverOutput, User client) {
         super(serverInput, serverOutput);
         this.client = client;
-        try{
-            br = new BufferedReader(new InputStreamReader(serverInput));
-            pw = new PrintWriter(serverOutput);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
     }
 
     @Override
     public void run() {
-        writer.println("채팅방에 입장하였습니다.(/q를 입력하여 퇴장)");
+        writer.println("채팅방에 입장하였습니다. (/q를 입력하여 퇴장)");
 
         Thread receiverThread = new Thread(() -> {
-            try{
-                while(true){
-                    Chat receivedChat = (Chat) serverInput.readObject();
-                    writer.printf("%s : %s - %s%n",
-                                receivedChat.getUserName(),
-                                receivedChat.getMessage(),
-                                receivedChat.getTimeStamp());
+            try {
+                while (!Thread.currentThread().isInterrupted()) {
+                    Object receivedObject = serverInput.readObject();
+
+                    if (receivedObject instanceof Chat receivedChat) {
+                        writer.printf(receivedChat.toString());
+                    } else {
+                        writer.println("알 수 없는 데이터 수신: " + receivedObject);
+                    }
                 }
-            }catch (Exception e){
+            } catch (EOFException e) {
+                writer.println("서버와의 연결이 종료되었습니다.");
+            } catch (Exception e) {
+                e.printStackTrace();
                 writer.println("서버와 연결이 끊어졌습니다.");
             }
         });
+
         receiverThread.start();
+
         try {
             while (true) {
-                // 사용자 입력
                 String inputMsg = scanner.nextLine();
-
-                // "/q" 입력 시 채팅 종료
                 if (inputMsg.equalsIgnoreCase("/q")) {
                     writer.println("채팅방을 나갑니다.");
+                    Chat disconnectMessage = new Chat(client.getUserName(), "/q", Timestamp.valueOf(LocalDateTime.now()));
+                    serverOutput.writeObject(disconnectMessage);
+                    serverOutput.flush();
                     break;
                 }
                 Timestamp nowTimeStamp = Timestamp.valueOf(LocalDateTime.now());
-                Chat chat = new Chat(client.getUserName(), inputMsg , nowTimeStamp);
+                Chat chat = new Chat(client.getUserName(), inputMsg, nowTimeStamp);
 
-                // 서버에 전송
                 serverOutput.writeObject(chat);
                 serverOutput.flush();
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             writer.println("채팅 도중 오류가 발생했습니다.");
             e.printStackTrace();
+        } finally {
+            receiverThread.interrupt();
         }
     }
 }
