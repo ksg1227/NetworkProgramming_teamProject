@@ -3,6 +3,7 @@ package server;
 import dto.Packet;
 import entity.User;
 import server.handler.host.HostVoteHandler;
+import server.handler.normal.ServerChatHandler;
 import server.handler.normal.ServerPlaceSuggestHandler;
 import server.handler.normal.ServerVoteHandler;
 
@@ -75,40 +76,38 @@ public class ServerThread extends Thread {
                     break;
                 }
 
-                // TODO : 각각의 기능 구현 필요
-                assert packet != null;
-                assert packet.body().equals(EMPTY_BODY);
+            assert packet != null;
+            assert packet.body().equals(EMPTY_BODY);
 
-                switch (packet.clientState()) {
-                    case HOME -> {
-                        writer.println("home");
+            switch (packet.clientState()) {
+                case HOME -> {
+                    System.out.println("home");
+                }
+                case CHATTING -> {
+                    new ServerChatHandler(clientInput,clientOutput,onChatClients,user).run();
+                }
+                case SCHEDULE -> {
+                    System.out.println("schedule");
+                }
+                case STATISTIC -> {
+                    System.out.println("statistic");
+                }
+                case PLACE_VOTE -> {
+                    onVoteClients.put(user.getUserName(), clientOutput);
+                    if(user.isHost()) {
+                        new HostVoteHandler(clientInput, clientOutput, onVoteClients, user).run();
+                    } else {
+                        new ServerVoteHandler(clientInput, clientOutput, onVoteClients, user).run();
                     }
-                    case CHATTING -> {
-                        writer.println("chat");
-                    }
-                    case SCHEDULE -> {
-                        writer.println("schedule");
-                    }
-                    case STATISTIC -> {
-                        writer.println("statistic");
-                    }
-                    case PLACE_VOTE -> {
-                        onVoteClients.put(user.getUserName(), clientOutput);
-                        if (user.isHost()) {
-                            new HostVoteHandler(clientInput, clientOutput, onVoteClients, user).run();
-                        } else {
-                            new ServerVoteHandler(clientInput, clientOutput, onVoteClients, user).run();
-                        }
-                        onVoteClients.remove(user.getUserName());
-                    }
-                    case PLACE_SUGGESTION -> {
-                        onPlaceSuggestClients.put(user.getUserName(), clientOutput);
-                        new ServerPlaceSuggestHandler(clientInput, clientOutput, onPlaceSuggestClients).run();
-                        onPlaceSuggestClients.remove(user.getUserName());
-                    }
-                    case null, default -> {
-                        writer.println("nothing");
-                    }
+                    onVoteClients.remove(user.getUserName());
+                }
+                case PLACE_SUGGESTION -> {
+                    onPlaceSuggestClients.put(user.getUserName(), clientOutput);
+                    new ServerPlaceSuggestHandler(clientInput, clientOutput, onPlaceSuggestClients).run();
+                    onPlaceSuggestClients.remove(user.getUserName());
+                }
+                case null, default -> {
+                    System.out.println("nothing");
                 }
             }
         } finally {
