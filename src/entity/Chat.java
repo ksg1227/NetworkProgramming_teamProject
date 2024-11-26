@@ -15,6 +15,7 @@ public class Chat implements Serializable {
         this.timestamp = timestamp;
     }
 
+
     public String getUserName() {
         return userName;
     }
@@ -25,5 +26,10 @@ public class Chat implements Serializable {
 
     public Timestamp getTimeStamp() {
         return timestamp;
+    }
+
+    @Override
+    public String toString() {
+        return userName + ": " + message + " - " + timestamp + "\n";
     }
 }

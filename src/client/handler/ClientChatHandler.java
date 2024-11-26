@@ -25,10 +25,7 @@ public class ClientChatHandler extends ClientFeatureHandler {
                     Object receivedObject = serverInput.readObject();
 
                     if (receivedObject instanceof Chat receivedChat) {
-                        writer.printf("%s : %s - %s%n",
-                                receivedChat.getUserName(),
-                                receivedChat.getMessage(),
-                                receivedChat.getTimeStamp());
+                        writer.printf(receivedChat.toString());
                     } else {
                         writer.println("알 수 없는 데이터 수신: " + receivedObject);
                     }
