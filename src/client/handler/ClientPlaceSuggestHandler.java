@@ -32,11 +32,11 @@ public class ClientPlaceSuggestHandler extends ClientFeatureHandler {
         String input = scanner.nextLine();
         String response = null;
 
-        if(input.equals("exit")) {
+        response = addPlace(input);
+
+        if(response.equals("exit")) {
             return;
         }
-
-        response = addPlace(input);
 
         writer.println(response);
     }

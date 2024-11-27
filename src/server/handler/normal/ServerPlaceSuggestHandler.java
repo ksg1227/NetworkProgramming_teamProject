@@ -31,7 +31,9 @@ public class ServerPlaceSuggestHandler extends ServerFeatureHandler {
             e.printStackTrace();
         }
 
-        if(doesPlaceExist(place)) {
+        if(place.equals("exit")) {
+            packet = createPacket("exit");
+        } else if(doesPlaceExist(place)) {
             packet = createPacket("place already exist");
         } else {
             if(addPlace(place)) {
