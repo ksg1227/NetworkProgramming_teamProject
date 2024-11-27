@@ -1,5 +1,8 @@
 package client;
 
+import client.handler.ClientPlaceSuggestHandler;
+import client.handler.ClientVoteHandler;
+import dto.ClientState;
 import dto.Packet;
 import entity.User;
 
@@ -7,10 +10,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
-import static dto.ClientState.*;
-
 public class ClientCore extends Thread {
-    private Socket socket;
     private ObjectOutputStream serverOutput;
     private ObjectInputStream serverInput;
     private final Scanner scanner = new Scanner(System.in);
@@ -19,8 +19,9 @@ public class ClientCore extends Thread {
 
     public ClientCore() {
         try {
-            socket = new Socket("localhost", 10000);
+            Socket socket = new Socket("localhost", 10000);
             serverOutput = new ObjectOutputStream(socket.getOutputStream());
+            serverOutput.flush();
             serverInput = new ObjectInputStream(socket.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
@@ -29,56 +30,64 @@ public class ClientCore extends Thread {
 
     @Override
     public void run() {
-        writer.println("Connected to server\n");
+        writer.println("Connected to server");
 
         createClient();
 
+        writer.println(client+ " connected");
+
+        ClientState state = ClientState.HOME;
+
         while (true) {
-            showMenuScreen();
+            writer.println("Select feature");
+            writer.println("[1]. Enter chat");
+            writer.println("[2]. Enter schedule");
+            writer.println("[3]. Suggest place");
+            writer.println("[4]. Vote place");
+            writer.println("[5]. Show statistic");
 
-            writer.print("어떤 기능을 사용하시겠습니까? : ");
-            writer.flush();
+            state = setState();
 
-            String functionNum = scanner.nextLine();
+            try {
+                notifyState(state);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 
-            switch (functionNum) {
-                // body 데이터 타입은 Integer로 임시 설정
-                case "1"-> {
-                    Packet<Integer> packet = new Packet<>(SCHEDULE, 1);
-
-                    sendPacketToServer(packet);
+            switch (state) {
+                case HOME -> {
+                    writer.println("home");
                 }
-                case "2" -> {
-                    Packet<Integer> packet = new Packet<>(PLACE_SUGGESTION, 2);
-
-                    sendPacketToServer(packet);
+                case CHATTING -> {
+                    writer.println("chat");
                 }
-                case "3" -> {
-                    Packet<Integer> packet = new Packet<>(PLACE_VOTE, 3);
-
-                    sendPacketToServer(packet);
+                case SCHEDULE -> {
+                    writer.println("schedule");
                 }
-                case "4" -> {
-                    Packet<Integer> packet = new Packet<>(STATISTIC, 4);
-
-                    sendPacketToServer(packet);
+                case STATISTIC -> {
+                    writer.println("statistic");
                 }
-                case "5" -> {
-                    Packet<Integer> packet = new Packet<>(CHATTING, 5);
-
-                    sendPacketToServer(packet);
+                case PLACE_VOTE -> {
+                    new ClientVoteHandler(serverInput, serverOutput, client).run();
                 }
-                default -> {
-                    writer.println("유효하지 않은 입력입니다. 다시 선택해주세요.");
+                case PLACE_SUGGESTION -> {
+                    new ClientPlaceSuggestHandler(serverInput, serverOutput).run();
+                }
+                case null, default -> {
+                    writer.println("unknown");
                 }
             }
         }
+    }
 
+    private void notifyState(ClientState state) throws IOException {
+        Packet<Integer> packet = new Packet<>(state, 0);
+        serverOutput.writeObject(packet);
+        serverOutput.flush();
     }
 
     private void createClient() {
-        writer.print("이름 : ");
-        writer.flush();
+        writer.println("Enter name");
 
         String userName;
         try {
@@ -95,24 +104,30 @@ public class ClientCore extends Thread {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-
     }
 
-    private void sendPacketToServer(Packet<?> packet) {
-        try {
-            serverOutput.writeObject(packet);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    private ClientState setState() {
+        String input = scanner.nextLine();
+
+        switch (input) {
+            case "chat", "1" -> {
+                return ClientState.CHATTING;
+            }
+            case "schedule", "2" -> {
+                return ClientState.SCHEDULE;
+            }
+            case "place-suggest", "3" -> {
+                return ClientState.PLACE_SUGGESTION;
+            }
+            case "place-vote", "4" -> {
+                return ClientState.PLACE_VOTE;
+            }
+            case "statistic", "5" -> {
+                return ClientState.STATISTIC;
+            }
+            case null, default ->  {
+                return ClientState.HOME;
+            }
         }
-    }
-
-    public void showMenuScreen() {
-        writer.println("========================================");
-        writer.println("(1) : 날짜 조율 기능");
-        writer.println("(2) : 장소 제시 기능");
-        writer.println("(3) : 장소 투표 기능");
-        writer.println("(4) : 일정 확인 기능");
-        writer.println("(5) : 채팅 기능");
-        writer.println("========================================");
     }
 }
