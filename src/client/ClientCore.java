@@ -11,6 +11,8 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
+import static dto.ClientState.*;
+
 public class ClientCore extends Thread {
     private ObjectOutputStream serverOutput;
     private ObjectInputStream serverInput;
@@ -35,8 +37,8 @@ public class ClientCore extends Thread {
         createClient();
 
         writer.println(client+ " connected");
-        ClientState state = ClientState.HOME;
         while (true) {
+            ClientState state = HOME;
             writer.println("Select feature");
             writer.println("[1]. Enter chat");
             writer.println("[2]. Enter schedule");
@@ -108,22 +110,22 @@ public class ClientCore extends Thread {
 
         switch (input) {
             case "chat", "1" -> {
-                return ClientState.CHATTING;
+                return CHATTING;
             }
             case "schedule", "2" -> {
-                return ClientState.SCHEDULE;
+                return SCHEDULE;
             }
             case "place-suggest", "3" -> {
-                return ClientState.PLACE_SUGGESTION;
+                return PLACE_SUGGESTION;
             }
             case "place-vote", "4" -> {
-                return ClientState.PLACE_VOTE;
+                return PLACE_VOTE;
             }
             case "statistic", "5" -> {
-                return ClientState.STATISTIC;
+                return STATISTIC;
             }
             case null, default ->  {
-                return ClientState.HOME;
+                return HOME;
             }
         }
     }

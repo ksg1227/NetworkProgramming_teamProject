@@ -26,7 +26,6 @@ public class ServerChatHandler extends ServerFeatureHandler {
         try {
             synchronized (recentChats) {
                 for (Chat chat : recentChats) {
-                    if(chat.getUserName().equals("Server")) continue;
                     clientOutput.writeObject(chat);
                 }
                 clientOutput.flush();
@@ -41,6 +40,7 @@ public class ServerChatHandler extends ServerFeatureHandler {
             if (recentChats.size() >= MAX_RECENT_CHAT) {
                 recentChats.pollFirst(); // 가장 오래된 메시지 제거
             }
+            if(chat.getUserName().equals("Server")) return;
             recentChats.addLast(chat);
         }
     }
@@ -54,6 +54,7 @@ public class ServerChatHandler extends ServerFeatureHandler {
             for (ObjectOutputStream clientOutput : collection) {
                 try {
                     clientOutput.writeObject(chat);
+                    clientOutput.reset();
                     clientOutput.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -64,7 +65,11 @@ public class ServerChatHandler extends ServerFeatureHandler {
 
     @Override
     public void run() {
-        this.getOnFeatureClients().put(client.getUserName(), clientOutput);
+        Map<String, ObjectOutputStream> onChatClients = this.getOnFeatureClients();
+        synchronized (onChatClients){
+            onChatClients.put(client.getUserName(), clientOutput);
+        }
+
         broadcast(new Chat("Server",
                 client.getUserName() + "님이 채팅방에 입장하셨습니다.",
                 Timestamp.valueOf(LocalDateTime.now())));
@@ -78,11 +83,12 @@ public class ServerChatHandler extends ServerFeatureHandler {
 
                 if (receivedObject instanceof Chat receivedChat) {
                     if (receivedChat.getMessage().equals("/q")) {
-                        this.getOnFeatureClients().remove(client.getUserName());
+                        synchronized (onChatClients){
+                            onChatClients.remove(client.getUserName());
+                        }
                         broadcast(new Chat("Server",
                                 client.getUserName() + "님이 채팅방에서 나가셨습니다.",
                                 Timestamp.valueOf(LocalDateTime.now())));
-
                         break;
                     }
                     broadcast(receivedChat);

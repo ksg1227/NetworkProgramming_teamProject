@@ -2,9 +2,11 @@ package entity;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.sql.Time;
 import java.sql.Timestamp;
 
 public class Chat implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String userName;
     private String message;
     private Timestamp timestamp;
@@ -22,10 +24,6 @@ public class Chat implements Serializable {
 
     public String getMessage() {
         return message;
-    }
-
-    public Timestamp getTimeStamp() {
-        return timestamp;
     }
 
     @Override

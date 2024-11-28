@@ -26,9 +26,6 @@ public class ClientChatHandler extends ClientFeatureHandler {
                 String inputMsg = scanner.nextLine();
                 if (inputMsg.equalsIgnoreCase("/q")) {
                     writer.println("채팅방을 나갑니다.");
-                    Chat disconnectMessage = new Chat(client.getUserName(), "/q", Timestamp.valueOf(LocalDateTime.now()));
-                    serverOutput.writeObject(disconnectMessage);
-                    serverOutput.flush();
                     break;
                 }
                 Chat chat = new Chat(client.getUserName(), inputMsg, Timestamp.valueOf(LocalDateTime.now()));
@@ -59,7 +56,6 @@ public class ClientChatHandler extends ClientFeatureHandler {
             } catch (EOFException e) {
                 writer.println("서버와의 연결이 종료되었습니다.");
             } catch (Exception e) {
-                e.printStackTrace();
                 writer.println("서버와 연결이 끊어졌습니다.");
             }
         });
@@ -67,4 +63,5 @@ public class ClientChatHandler extends ClientFeatureHandler {
         receiverThread.start();
         return receiverThread;
     }
+
 }
