@@ -7,4 +7,8 @@ public class ClientOrderGenerator {
         order++;
         return order;
     }
+
+    public static void decreaseOrder() {
+        order--;
+    }
 }

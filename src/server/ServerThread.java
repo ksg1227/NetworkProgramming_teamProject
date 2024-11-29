@@ -6,10 +6,7 @@ import server.handler.host.HostVoteHandler;
 import server.handler.normal.ServerPlaceSuggestHandler;
 import server.handler.normal.ServerVoteHandler;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -55,7 +52,6 @@ public class ServerThread extends Thread {
     @Override
     public void run() {
         setUserName();
-
         notifyUserInfoToClient();
 
         Integer EMPTY_BODY = 0;
@@ -63,50 +59,88 @@ public class ServerThread extends Thread {
         System.out.println(user.getUserName() + " joined");
         Packet<Integer> packet = null;
 
-        while (!currentThread().isInterrupted()) {
-            try {
-                packet = (Packet<Integer>) clientInput.readObject();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            // TODO : 각각의 기능 구현 필요
-            assert packet != null;
-            assert packet.body().equals(EMPTY_BODY);
-
-            switch (packet.clientState()) {
-                case HOME -> {
-                    writer.println("home");
-                }
-                case CHATTING -> {
-                    writer.println("chat");
-                }
-                case SCHEDULE -> {
-                    writer.println("schedule");
-                }
-                case STATISTIC -> {
-                    writer.println("statistic");
-                }
-                case PLACE_VOTE -> {
-                    onVoteClients.put(user.getUserName(), clientOutput);
-                    if(user.isHost()) {
-                        new HostVoteHandler(clientInput, clientOutput, onVoteClients, user).run();
-                    } else {
-                        new ServerVoteHandler(clientInput, clientOutput, onVoteClients, user).run();
+        try {
+            while (!currentThread().isInterrupted()) {
+                try {
+                    packet = (Packet<Integer>) clientInput.readObject();
+                    if (packet == null) {
+                        break; // 클라이언트가 연결을 종료하면 null이 반환됨
                     }
-                    onVoteClients.remove(user.getUserName());
+                } catch (EOFException e) {
+                    // 클라이언트가 연결을 끊었을 때
+                    System.out.println(user.getUserName() + " disconnected.");
+                    break;  // while loop 종료
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                    break;
                 }
-                case PLACE_SUGGESTION -> {
-                    onPlaceSuggestClients.put(user.getUserName(), clientOutput);
-                    new ServerPlaceSuggestHandler(clientInput, clientOutput, onPlaceSuggestClients).run();
-                    onPlaceSuggestClients.remove(user.getUserName());
-                }
-                case null, default -> {
-                    writer.println("nothing");
+
+                // TODO : 각각의 기능 구현 필요
+                assert packet != null;
+                assert packet.body().equals(EMPTY_BODY);
+
+                switch (packet.clientState()) {
+                    case HOME -> {
+                        writer.println("home");
+                    }
+                    case CHATTING -> {
+                        writer.println("chat");
+                    }
+                    case SCHEDULE -> {
+                        writer.println("schedule");
+                    }
+                    case STATISTIC -> {
+                        writer.println("statistic");
+                    }
+                    case PLACE_VOTE -> {
+                        onVoteClients.put(user.getUserName(), clientOutput);
+                        if (user.isHost()) {
+                            new HostVoteHandler(clientInput, clientOutput, onVoteClients, user).run();
+                        } else {
+                            new ServerVoteHandler(clientInput, clientOutput, onVoteClients, user).run();
+                        }
+                        onVoteClients.remove(user.getUserName());
+                    }
+                    case PLACE_SUGGESTION -> {
+                        onPlaceSuggestClients.put(user.getUserName(), clientOutput);
+                        new ServerPlaceSuggestHandler(clientInput, clientOutput, onPlaceSuggestClients).run();
+                        onPlaceSuggestClients.remove(user.getUserName());
+                    }
+                    case null, default -> {
+                        writer.println("nothing");
+                    }
                 }
             }
+        } finally {
+            // 클라이언트 연결 종료 시 리소스 정리 및 order 감소
+            ClientOrderGenerator.decreaseOrder();
+
+            cleanup();
         }
     }
+
+    private void cleanup() {
+        // 클라이언트가 종료되었을 때, 해당 클라이언트의 정보를 매핑된 리스트에서 제거
+        if (user != null) {
+            onChatClients.remove(user.getUserName());
+            onScheduleClients.remove(user.getUserName());
+            onStatisticClients.remove(user.getUserName());
+            onVoteClients.remove(user.getUserName());
+            onPlaceSuggestClients.remove(user.getUserName());
+        }
+
+        try {
+            if (clientInput != null) {
+                clientInput.close();
+            }
+            if (clientOutput != null) {
+                clientOutput.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void notifyUserInfoToClient() {
         try {
