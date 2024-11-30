@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 public class ClientChatHandler extends ClientFeatureHandler {
     private final User client;
 
-    public ClientChatHandler(ObjectInputStream serverInput, ObjectOutputStream serverOutput, User client) {
-        super(serverInput, serverOutput);
+    public ClientChatHandler(BufferedReader chatReader, PrintWriter chatWriter, User client) {
+        super(chatReader, chatWriter);
         this.client = client;
     }
 
@@ -26,16 +26,15 @@ public class ClientChatHandler extends ClientFeatureHandler {
                 String inputMsg = scanner.nextLine();
                 if (inputMsg.equalsIgnoreCase("/q")) {
                     writer.println("채팅방을 나갑니다.");
+                    chatWriter.println("/q");
+                    chatWriter.flush();
                     break;
                 }
-                Chat chat = new Chat(client.getUserName(), inputMsg, Timestamp.valueOf(LocalDateTime.now()));
-
-                serverOutput.writeObject(chat);
-                serverOutput.flush();
+                chatWriter.println(inputMsg);
+                chatWriter.flush();
             }
-        } catch (IOException e) {
-            writer.println("채팅 도중 오류가 발생했습니다.");
-            e.printStackTrace();
+        }catch (Exception e){
+            writer.println(e.getMessage());
         } finally {
             receiverThread.interrupt();
         }
@@ -44,19 +43,12 @@ public class ClientChatHandler extends ClientFeatureHandler {
     private Thread createReceiverThread() {
         Thread receiverThread = new Thread(() -> {
             try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    Object receivedObject = serverInput.readObject();
-
-                    if (receivedObject instanceof Chat receivedChat) {
-                        writer.printf(receivedChat.toString());
-                    } else {
-                        writer.println("알 수 없는 데이터 수신: " + receivedObject);
-                    }
+                String receivedMessage;
+                while (!Thread.currentThread().isInterrupted() && (receivedMessage = chatReader.readLine()) != null) {
+                    writer.println(receivedMessage);
                 }
-            } catch (EOFException e) {
-                writer.println("서버와의 연결이 종료되었습니다.");
             } catch (Exception e) {
-                writer.println("서버와 연결이 끊어졌습니다.");
+                writer.println("메시지 수신 중 오류가 발생했습니다: " + e.getMessage());
             }
         });
 

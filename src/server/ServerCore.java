@@ -13,7 +13,7 @@ public class ServerCore extends Thread {
     private static final ConcurrentHashMap<String, ObjectOutputStream> onStatisticClients = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, ObjectOutputStream> onVoteClients = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, ObjectOutputStream> onPlaceSuggestClients = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<String, ObjectOutputStream> onChatClients = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, PrintWriter> onChatClients = new ConcurrentHashMap<>();
     private static ServerSocket serverSocket = null;
     private final PrintWriter writer = new PrintWriter(System.out, true);
 
