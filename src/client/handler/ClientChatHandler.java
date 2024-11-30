@@ -1,11 +1,9 @@
 package client.handler;
 
-import entity.Chat;
 import entity.User;
 
-import java.io.*;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
 
 public class ClientChatHandler extends ClientFeatureHandler {
     private final User client;
