@@ -14,50 +14,48 @@ import java.util.Map;
 public class ServerChatHandler extends ServerFeatureHandler {
     protected final User client;
     private static final int MAX_RECENT_CHAT = 10;
-    private static final Deque<Chat> recentChats = new LinkedList<>();
+    private static final Deque<String> recentChats = new LinkedList<>();
 
-    public ServerChatHandler(ObjectInputStream clientInput, ObjectOutputStream clientOutput,
-                             Map<String, ObjectOutputStream> onFeatureClients, User client) {
-        super(clientInput, clientOutput, onFeatureClients);
+    public ServerChatHandler(BufferedReader chatReader, PrintWriter chatWriter, Map<String, PrintWriter> onFeatureClients, User client)
+    {
+        super(chatReader, chatWriter, onFeatureClients);
         this.client = client;
     }
 
     private void showRecentChats() {
-        try {
-            synchronized (recentChats) {
-                for (Chat chat : recentChats) {
-                    clientOutput.writeObject(chat);
+        synchronized (recentChats) {
+            for (String chat : recentChats) {
+                if (chat != null && !chat.trim().isEmpty()) {
+                    chatWriter.println(chat);
                 }
-                clientOutput.flush();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            chatWriter.flush();
         }
     }
 
-    private void saveChats(Chat chat) {
+
+
+    private void saveChats(String chat) {
         synchronized (recentChats) {
             if (recentChats.size() >= MAX_RECENT_CHAT) {
                 recentChats.pollFirst(); // 가장 오래된 메시지 제거
             }
-            if(chat.getUserName().equals("Server")) return;
-            recentChats.addLast(chat);
+            if(!chat.startsWith("Server")){
+                recentChats.addLast(chat); // 새로운 메시지 추가
+            }
         }
     }
 
-    public void broadcast(Chat chat) {
+
+    public void broadcast(String chat) {
         saveChats(chat);
-        Map<String, ObjectOutputStream> onChatClients = this.getOnFeatureClients();
+        Map<String, PrintWriter> onChatClients = getOnFeatureClients();
 
         synchronized (onChatClients) {
-            Collection<ObjectOutputStream> collection = onChatClients.values();
-            for (ObjectOutputStream clientOutput : collection) {
-                try {
-                    clientOutput.writeObject(chat);
-                    clientOutput.reset();
-                    clientOutput.flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
+            for (PrintWriter clientWriter : onChatClients.values()) {
+                if (chat != null && !chat.trim().isEmpty()) {
+                    clientWriter.println(chat);
+                    clientWriter.flush();
                 }
             }
         }
@@ -65,42 +63,35 @@ public class ServerChatHandler extends ServerFeatureHandler {
 
     @Override
     public void run() {
-        Map<String, ObjectOutputStream> onChatClients = this.getOnFeatureClients();
-        synchronized (onChatClients){
-            onChatClients.put(client.getUserName(), clientOutput);
+        Map<String, PrintWriter> onChatClients = getOnFeatureClients();
+        broadcast(makeMessage("Server", client.getUserName() +"님이 채팅방에 입장하셨습니다."));
+        synchronized (onChatClients) {
+            onChatClients.put(client.getUserName(), chatWriter);
         }
-
-        broadcast(new Chat("Server",
-                client.getUserName() + "님이 채팅방에 입장하셨습니다.",
-                Timestamp.valueOf(LocalDateTime.now())));
 
         try {
             // 최근 채팅 내역 전송
             showRecentChats();
 
-            while (true) {
-                Object receivedObject = clientInput.readObject();
-
-                if (receivedObject instanceof Chat receivedChat) {
-                    if (receivedChat.getMessage().equals("/q")) {
-                        synchronized (onChatClients){
-                            onChatClients.remove(client.getUserName());
-                        }
-                        broadcast(new Chat("Server",
-                                client.getUserName() + "님이 채팅방에서 나가셨습니다.",
-                                Timestamp.valueOf(LocalDateTime.now())));
-                        break;
+            String message;
+            while ((message = chatReader.readLine()) != null) {
+                if (message.equalsIgnoreCase("/q")) {
+                    synchronized (onChatClients) {
+                        onChatClients.remove(client.getUserName());
                     }
-                    broadcast(receivedChat);
-                } else {
-                    System.out.println("알 수 없는 데이터 수신: " + receivedObject);
+                    broadcast(makeMessage("Server", client.getUserName()+"님이 채팅방에서 퇴장하셨습니다."));
+                    break;
                 }
+                broadcast(makeMessage(client.getUserName(),message));
             }
-        } catch (EOFException e) {
-            System.out.println(client.getUserName() + " 연결이 종료되었습니다.");
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("연결이 종료되었습니다.");
         }
     }
+
+    private String makeMessage(String userName, String msg){
+        return userName + ": " + msg + " - " + Timestamp.valueOf(LocalDateTime.now());
+    }
+
 
 }

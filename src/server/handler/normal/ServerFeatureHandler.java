@@ -1,13 +1,14 @@
 package server.handler.normal;
 
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.Map;
 
 public abstract class ServerFeatureHandler {
     protected final ObjectInputStream clientInput;
     protected final ObjectOutputStream clientOutput;
-    protected final Map<String, ObjectOutputStream> onFeatureClients;
+    protected final BufferedReader chatReader;
+    protected final PrintWriter chatWriter;
+    protected final Map<String, ?> onFeatureClients;
 
     public ServerFeatureHandler(
             ObjectInputStream clientInput,
@@ -16,16 +17,27 @@ public abstract class ServerFeatureHandler {
     ) {
         this.clientOutput = clientOutput;
         this.clientInput = clientInput;
+        this.chatReader = null;
+        this.chatWriter = null;
         this.onFeatureClients = onFeatureClients;
     }
 
-    public ServerFeatureHandler(ObjectOutputStream clientOutput, ObjectInputStream clientInput) {
-        this.clientOutput = clientOutput;
-        this.clientInput = clientInput;
-        this.onFeatureClients = null;
+    public ServerFeatureHandler(
+            BufferedReader chatReader,
+            PrintWriter chatWriter,
+            Map<String, PrintWriter> onFeatureClients
+    ) {
+        this.clientInput = null;
+        this.clientOutput = null;
+        this.chatReader = chatReader;
+        this.chatWriter = chatWriter;
+        this.onFeatureClients = onFeatureClients;
     }
-    public Map<String, ObjectOutputStream> getOnFeatureClients() {
-        return onFeatureClients;
+
+    @SuppressWarnings("unchecked")
+    public <T> Map<String, T> getOnFeatureClients() {
+        return (Map<String, T>) onFeatureClients;
     }
+
     abstract public void run();
 }

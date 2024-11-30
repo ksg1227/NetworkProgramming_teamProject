@@ -16,6 +16,8 @@ import static dto.ClientState.*;
 public class ClientCore extends Thread {
     private ObjectOutputStream serverOutput;
     private ObjectInputStream serverInput;
+    private BufferedReader chatReader;
+    private PrintWriter chatWriter;
     private final Scanner scanner = new Scanner(System.in);
     private final PrintWriter writer = new PrintWriter(System.out, true);
     private User client;
@@ -23,9 +25,14 @@ public class ClientCore extends Thread {
     public ClientCore() {
         try {
             Socket socket = new Socket("localhost", 10000);
-            serverOutput = new ObjectOutputStream(socket.getOutputStream());
+            OutputStream out = socket.getOutputStream();
+            InputStream in = socket.getInputStream();
+            serverOutput = new ObjectOutputStream(out);
             serverOutput.flush();
-            serverInput = new ObjectInputStream(socket.getInputStream());
+            serverInput = new ObjectInputStream(in);
+
+            chatReader = new BufferedReader(new InputStreamReader(in));
+            chatWriter = new PrintWriter(out, true);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -58,7 +65,7 @@ public class ClientCore extends Thread {
                     writer.println("home");
                 }
                 case CHATTING -> {
-                    new ClientChatHandler(serverInput,serverOutput,client).run();
+                    new ClientChatHandler(chatReader,chatWriter,client).run();
                 }
                 case SCHEDULE -> {
                     writer.println("schedule");

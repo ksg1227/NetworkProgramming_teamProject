@@ -16,9 +16,6 @@ public class ServerPlaceSuggestHandler extends ServerFeatureHandler {
         super(clientInput, clientOutput, onFeatureClients);
     }
 
-    public ServerPlaceSuggestHandler(ObjectOutputStream clientOutput, ObjectInputStream clientInput) {
-        super(clientOutput, clientInput);
-    }
 
     @Override
     public void run() {

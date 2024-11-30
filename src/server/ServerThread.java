@@ -7,15 +7,12 @@ import server.handler.host.HostVoteHandler;
 import server.handler.normal.ServerPlaceSuggestHandler;
 import server.handler.normal.ServerVoteHandler;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerThread extends Thread {
-    private static ConcurrentHashMap<String, ObjectOutputStream> onChatClients;
+    private static ConcurrentHashMap<String, PrintWriter> onChatClients;
     private static ConcurrentHashMap<String, ObjectOutputStream> onScheduleClients;
     private static ConcurrentHashMap<String, ObjectOutputStream> onStatisticClients;
     private static ConcurrentHashMap<String, ObjectOutputStream> onVoteClients;
@@ -23,14 +20,15 @@ public class ServerThread extends Thread {
 
     private final ObjectInputStream clientInput;
     private final ObjectOutputStream clientOutput;
-
+    private final BufferedReader chatReader;
+    private final PrintWriter chatWriter;
     private final PrintWriter writer = new PrintWriter(System.out, true);
 
     private final User user;
 
     public ServerThread(
             Socket socket,
-            ConcurrentHashMap<String, ObjectOutputStream> onChatClients,
+            ConcurrentHashMap<String, PrintWriter> onChatClients,
             ConcurrentHashMap<String, ObjectOutputStream> onScheduleClients,
             ConcurrentHashMap<String, ObjectOutputStream> onStatisticClients,
             ConcurrentHashMap<String, ObjectOutputStream> onVoteClients,
@@ -43,9 +41,13 @@ public class ServerThread extends Thread {
         ServerThread.onPlaceSuggestClients = onPlaceSuggestClients;
 
         try {
-            this.clientOutput = new ObjectOutputStream(socket.getOutputStream());
+            InputStream in = socket.getInputStream();
+            OutputStream out = socket.getOutputStream();
+            this.clientOutput = new ObjectOutputStream(out);
             clientOutput.flush();
-            this.clientInput = new ObjectInputStream(socket.getInputStream());
+            this.clientInput = new ObjectInputStream(in);
+            this.chatWriter = new PrintWriter(out, true);
+            this.chatReader = new BufferedReader(new InputStreamReader(in));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -80,7 +82,7 @@ public class ServerThread extends Thread {
                     System.out.println("home");
                 }
                 case CHATTING -> {
-                    new ServerChatHandler(clientInput,clientOutput,onChatClients,user).run();
+                    new ServerChatHandler(chatReader,chatWriter,onChatClients,user).run();
                 }
                 case SCHEDULE -> {
                     System.out.println("schedule");
