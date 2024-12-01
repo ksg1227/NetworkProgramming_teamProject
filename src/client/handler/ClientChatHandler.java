@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 
 public class ClientChatHandler extends ClientFeatureHandler {
     private final User client;
+    private volatile boolean running = true; // 스레드 실행 상태 플래그
 
     public ClientChatHandler(BufferedReader chatReader, PrintWriter chatWriter, User client) {
         super(chatReader, chatWriter);
@@ -31,27 +32,40 @@ public class ClientChatHandler extends ClientFeatureHandler {
                 chatWriter.println(inputMsg);
                 chatWriter.flush();
             }
-        }catch (Exception e){
-            writer.println(e.getMessage());
+        } catch (Exception e) {
+            writer.println("오류 발생: " + e.getMessage());
         } finally {
-            receiverThread.interrupt();
+            running = false; // 실행 중단 신호
+            try {
+                receiverThread.join(); // receiverThread가 종료될 때까지 대기
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
         }
     }
 
     private Thread createReceiverThread() {
         Thread receiverThread = new Thread(() -> {
             try {
-                String receivedMessage;
-                while (!Thread.currentThread().isInterrupted() && (receivedMessage = chatReader.readLine()) != null) {
-                    writer.println(receivedMessage);
+                while (running) {
+                    if (chatReader.ready()) { // 데이터가 있을 때만 처리
+                        String receivedMessage = chatReader.readLine();
+                        if (receivedMessage != null) {
+                            writer.println(receivedMessage);
+                        }
+                    }
+                    // 잠시 대기하여 CPU 낭비 방지
+                    Thread.sleep(10);
                 }
             } catch (Exception e) {
-                writer.println("메시지 수신 중 오류가 발생했습니다: " + e.getMessage());
+                if (running) {
+                    writer.println("메시지 수신 중 오류가 발생했습니다: " + e.getMessage());
+                }
             }
         });
 
         receiverThread.start();
         return receiverThread;
     }
-
 }
