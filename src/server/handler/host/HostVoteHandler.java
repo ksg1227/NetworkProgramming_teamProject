@@ -36,17 +36,19 @@ public class HostVoteHandler extends ServerVoteHandler {
                 votePlace();
                 break;
             case null, default:
-                break;
+                return;
         }
     }
 
     private void startElection() {
         votes.clear();
         isVoting = true;
+        System.out.println("election started");
     }
 
     private void endElection() {
         isVoting = false;
+        System.out.println("election ended");
     }
 
     private void votePlace() {

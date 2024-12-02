@@ -41,6 +41,9 @@ public class ServerVoteHandler extends ServerFeatureHandler {
 
         // 2. 이미 투표했는지 확인
         sendResponse(votes.containsKey(user));
+        if(votes.containsKey(user)) {
+            return;
+        }
 
         // 3. 장소 목록 공유
         sendResponse(places);
