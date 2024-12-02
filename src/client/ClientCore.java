@@ -1,6 +1,5 @@
 package client;
 
-import client.handler.ClientChatHandler;
 import client.handler.ClientPlaceSuggestHandler;
 import client.handler.ClientVoteHandler;
 import dto.ClientState;
@@ -20,6 +19,7 @@ public class ClientCore extends Thread {
 
     private static JFrame mainFrame;
     private JLabel welcomeLabel;
+    private JLabel logoLabel;
     private JButton enterChatButton;
     private JButton enterScheduleButton;
     private JButton suggestPlaceButton;
@@ -38,23 +38,37 @@ public class ClientCore extends Thread {
         mainFrame.setSize(800, 600);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        setupWelcomeLabel();
-        setupButtonPanel();
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(50, 20, 20, 20));
 
+        setupLogo(mainPanel);
+        setupButtonPanel(mainPanel);
+
+        mainFrame.add(mainPanel);
         mainFrame.setVisible(true);
     }
 
-    // 라벨 설정
-    private void setupWelcomeLabel() {
-        welcomeLabel = new JLabel("Welcome to the 이때 돼");
-        welcomeLabel.setHorizontalAlignment(JLabel.CENTER);
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        mainFrame.add(welcomeLabel, BorderLayout.NORTH);
+    // 로고 설정
+    private void setupLogo(JPanel mainPanel) {
+        logoLabel = new JLabel();
+        logoLabel.setHorizontalAlignment(JLabel.CENTER);
+
+        // 로고 이미지 로드
+        try {
+            ImageIcon logoIcon = new ImageIcon("logo.png"); // 로고 파일 경로
+            Image logoImage = logoIcon.getImage().getScaledInstance(450, 450, Image.SCALE_SMOOTH);
+            logoLabel.setIcon(new ImageIcon(logoImage));
+        } catch (Exception e) {
+            logoLabel.setText("Logo Here");
+            logoLabel.setFont(new Font("Arial", Font.ITALIC, 16));
+        }
+
+        mainPanel.add(logoLabel, BorderLayout.CENTER);
     }
 
     // 버튼 패널 설정
-    private void setupButtonPanel() {
-        JPanel buttonPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+    private void setupButtonPanel(JPanel mainPanel) {
+        JPanel buttonPanel = new JPanel(new GridLayout(2, 3, 20, 20)); // 간격 키움
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         enterChatButton = createButton("Enter Chat", ClientState.CHATTING);
@@ -62,9 +76,7 @@ public class ClientCore extends Thread {
         suggestPlaceButton = createButton("Suggest Place", ClientState.PLACE_SUGGESTION);
         votePlaceButton = createButton("Vote Place", ClientState.PLACE_VOTE);
         showStatsButton = createButton("Show Statistics", ClientState.STATISTIC);
-        exitButton = new JButton("Exit");
-
-        exitButton.addActionListener(e -> exitApplication());
+        exitButton = createButton("Exit", null);
 
         buttonPanel.add(enterChatButton);
         buttonPanel.add(enterScheduleButton);
@@ -73,13 +85,19 @@ public class ClientCore extends Thread {
         buttonPanel.add(showStatsButton);
         buttonPanel.add(exitButton);
 
-        mainFrame.add(buttonPanel, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    // 버튼 생성
+    // 버튼 생성 (크기와 폰트 설정)
     private JButton createButton(String text, ClientState state) {
         JButton button = new JButton(text);
-        button.addActionListener(e -> handleButtonClick(state));
+        button.setFont(new Font("Arial", Font.BOLD, 18)); // 폰트 크기 키움
+        button.setPreferredSize(new Dimension(200, 80)); // 버튼 크기 설정
+        if (state != null) {
+            button.addActionListener(e -> handleButtonClick(state));
+        } else {
+            button.addActionListener(e -> exitApplication());
+        }
         return button;
     }
 
@@ -125,12 +143,12 @@ public class ClientCore extends Thread {
     }
 
     private void startVoteHandler() {
-//        mainFrame.setVisible(false);  각 핸들러의 동작이 끝나면 showMainFrame()을 통해 mainFrame을 다시 띄워줘야함
+//        mainFrame.setVisible(false); 각 핸들러의 동작이 끝나면 showMainFrame()을 통해 화면을 다시 띄워야함
         new ClientVoteHandler(serverInput, serverOutput, client).run();
     }
 
     private void startPlaceSuggestionHandler() {
-//        mainFrame.setVisible(false);  각 핸들러의 동작이 끝나면 showMainFrame()을 통해 mainFrame을 다시 띄워줘야함
+//        mainFrame.setVisible(false); 각 핸들러의 동작이 끝나면 showMainFrame()을 통해 화면을 다시 띄워야함
         new ClientPlaceSuggestHandler(serverInput, serverOutput).run();
     }
 
