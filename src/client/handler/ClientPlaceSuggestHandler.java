@@ -60,7 +60,7 @@ public class ClientPlaceSuggestHandler extends ClientFeatureHandler {
     }
 
     private void initUi() {
-        JFrame frame = new JFrame();
+        JFrame frame = new JFrame("장소 제안");
         JPanel header = new JPanel();
         JPanel body = new JPanel();
         JPanel footer = new JPanel();
