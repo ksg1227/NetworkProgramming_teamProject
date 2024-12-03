@@ -2,8 +2,10 @@ package server;
 
 import dto.Packet;
 import entity.User;
+import server.handler.host.HostScheduleHandler;
 import server.handler.host.HostVoteHandler;
 import server.handler.normal.ServerPlaceSuggestHandler;
+import server.handler.normal.ServerScheduleHandler;
 import server.handler.normal.ServerVoteHandler;
 
 import java.io.*;
@@ -87,7 +89,11 @@ public class ServerThread extends Thread {
                         writer.println("chat");
                     }
                     case SCHEDULE -> {
-                        writer.println("schedule");
+                        if (user.isHost()) {
+                            new HostScheduleHandler(clientInput, clientOutput, onVoteClients, user, ServerCore.getGlobalSchedule()).run();
+                        } else {
+                            new ServerScheduleHandler(clientInput, clientOutput, onVoteClients, user, ServerCore.getGlobalSchedule()).run();
+                        }
                     }
                     case STATISTIC -> {
                         writer.println("statistic");
