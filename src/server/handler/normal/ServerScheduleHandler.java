@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ServerScheduleHandler extends ServerFeatureHandler {
     private final User user;
     private final Schedule schedule;
-    private static boolean isScheduling = false;
+    private static volatile boolean isScheduling = false;
     protected static final ConcurrentHashMap<User, Boolean> userParticipation = new ConcurrentHashMap<>(); // 사용자 참여 상태 관리
 
     public ServerScheduleHandler(ObjectInputStream clientInput, ObjectOutputStream clientOutput, Map<String, ObjectOutputStream> onFeatureClients, User user, Schedule schedule) {
@@ -111,12 +111,12 @@ public class ServerScheduleHandler extends ServerFeatureHandler {
         clientOutput.writeObject(new Packet<>(ClientState.SCHEDULE, message));
     }
 
-    public static void startScheduling() {
+    public static synchronized void startScheduling() {
         isScheduling = true;
         System.out.println("[ServerScheduleHandler] Scheduling started.");
     }
 
-    public static void stopScheduling() {
+    public static synchronized void stopScheduling() {
         isScheduling = false;
         System.out.println("[ServerScheduleHandler] Scheduling stopped.");
     }
