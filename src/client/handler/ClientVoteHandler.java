@@ -80,13 +80,13 @@ public class ClientVoteHandler extends ClientFeatureHandler {
         boolean isVoting = isVoting();
         if(!isVoting) {
             JOptionPane.showMessageDialog(frame, "투표가 진행중이지 않습니다.");
-            frame.dispose();
+            return;
         }
 
         boolean hasVoted = hasAlreadyVoted();
         if(hasVoted) {
             JOptionPane.showMessageDialog(frame, "이미 투표했습니다.");
-            frame.dispose();
+            return;
         }
 
         getPlaces();
