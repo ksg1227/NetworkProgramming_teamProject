@@ -79,13 +79,13 @@ public class ServerScheduleHandler extends ServerFeatureHandler {
         }
 
         String[] dates = availableDates.split(", ");
+        LocalDate localDate;
         for (String date : dates) {
-            if (!isValidDate(date)) {
-                System.out.println("Invalid date format: " + date);
+            localDate = parseDate(date);
+            if (localDate == null) {
                 continue;
             }
 
-            LocalDate localDate = LocalDate.parse(date);
             System.out.println("local date: " + localDate);
             synchronized (schedule) {
                 if (schedule.isWithinRange(localDate)) {
@@ -98,12 +98,12 @@ public class ServerScheduleHandler extends ServerFeatureHandler {
         }
     }
 
-    private boolean isValidDate(String date) {
+    private LocalDate parseDate(String date) {
         try {
-            LocalDate.parse(date);
-            return true;
+            return LocalDate.parse(date);
         } catch (DateTimeParseException e) {
-            return false;
+            System.out.println("Invalid date format: " + date);
+            return null;
         }
     }
 
