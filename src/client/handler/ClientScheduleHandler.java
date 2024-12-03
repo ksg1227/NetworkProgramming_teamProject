@@ -1,7 +1,7 @@
 package client.handler;
 
 import dto.ClientState;
-import dto.HostElectionAction;
+import dto.HostSchedulingAction;
 import dto.Packet;
 import entity.User;
 
@@ -40,16 +40,16 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
             case "exit":
                 return;
             case "1":
-                serverOutput.writeObject(new Packet<HostElectionAction>(ClientState.PLACE_VOTE, HostElectionAction.START));
+                serverOutput.writeObject(new Packet<HostSchedulingAction>(ClientState.SCHEDULE, HostSchedulingAction.START));
                 setDateRange();
-                writer.println("Started election");
+                writer.println("Start date coordination");
                 break;
             case "2":
-                serverOutput.writeObject(new Packet<HostElectionAction>(ClientState.PLACE_VOTE, HostElectionAction.END));
-                writer.println("Finished election");
+                serverOutput.writeObject(new Packet<HostSchedulingAction>(ClientState.SCHEDULE, HostSchedulingAction.END));
+                writer.println("End date coordination");
                 break;
             case "3":
-                serverOutput.writeObject(new Packet<HostElectionAction>(ClientState.PLACE_VOTE, HostElectionAction.VOTE));
+                serverOutput.writeObject(new Packet<HostSchedulingAction>(ClientState.SCHEDULE, HostSchedulingAction.ADD_AVAILABLE_DATE));
                 enterAvailableDates();
             case null, default:
                 break;

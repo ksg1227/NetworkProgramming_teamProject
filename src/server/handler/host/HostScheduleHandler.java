@@ -1,7 +1,7 @@
 package server.handler.host;
 
 import dto.ClientState;
-import dto.HostElectionAction;
+import dto.HostSchedulingAction;
 import dto.Packet;
 import entity.Schedule;
 import entity.User;
@@ -25,12 +25,12 @@ public class HostScheduleHandler extends ServerScheduleHandler {
     @Override
     public void run() {
         try {
-            HostElectionAction action = null;
+            HostSchedulingAction action = null;
 
             try {
-                Packet<HostElectionAction> packet = (Packet<HostElectionAction>) clientInput.readObject();
+                Packet<HostSchedulingAction> packet = (Packet<HostSchedulingAction>) clientInput.readObject();
 
-                assert packet.clientState().equals(ClientState.PLACE_VOTE);
+                assert packet.clientState().equals(ClientState.SCHEDULE);
                 action = packet.body();
             } catch (Exception e) {}
 
@@ -43,7 +43,7 @@ public class HostScheduleHandler extends ServerScheduleHandler {
                     stopScheduling();
                     processResults();
                     break;
-                case VOTE:
+                case ADD_AVAILABLE_DATE:
                     voteDate();
                     break;
                 case null, default:
