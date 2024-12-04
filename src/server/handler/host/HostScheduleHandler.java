@@ -17,6 +17,7 @@ import java.util.Objects;
 
 public class HostScheduleHandler extends ServerScheduleHandler implements Serializable {
     private final Schedule schedule;
+    private static volatile boolean isScheduling = false;
 
     public HostScheduleHandler(ObjectInputStream clientInput, ObjectOutputStream clientOutput, Map<String, ObjectOutputStream> onFeatureClients, User user, Schedule schedule) {
         super(clientInput, clientOutput, onFeatureClients, user, schedule);
@@ -125,4 +126,19 @@ public class HostScheduleHandler extends ServerScheduleHandler implements Serial
     }
 
     private void voteDate() { super.run(); }
+
+    public static synchronized boolean isScheduling() {
+        return isScheduling;
+    }
+
+    private static synchronized void startScheduling() {
+        isScheduling = true;
+        System.out.println("[HostScheduleHandler] Scheduling started.");
+    }
+
+    private static synchronized void stopScheduling() {
+        isScheduling = false;
+        userParticipation.clear();
+        System.out.println("[HostScheduleHandler] Scheduling stopped.");
+    }
 }

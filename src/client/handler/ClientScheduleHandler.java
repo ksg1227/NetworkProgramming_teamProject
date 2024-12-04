@@ -116,6 +116,7 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
         String dates = scanner.nextLine();
 
         // 3. 서버에 가능 날짜 정보 전송
+        // TODO: 전송하기 전에 날짜 형식 예외처리
         Packet<String> packet = new Packet<>(ClientState.SCHEDULE, dates);
         serverOutput.writeObject(packet);
         serverOutput.flush();

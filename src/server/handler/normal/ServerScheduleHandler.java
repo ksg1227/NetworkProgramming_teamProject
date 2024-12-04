@@ -4,6 +4,7 @@ import dto.ClientState;
 import dto.Packet;
 import entity.Schedule;
 import entity.User;
+import server.handler.host.HostScheduleHandler;
 
 import java.io.*;
 import java.time.LocalDate;
@@ -14,7 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ServerScheduleHandler extends ServerFeatureHandler {
     private final User user;
     private final Schedule schedule;
-    private static volatile boolean isScheduling = false;
     protected static final ConcurrentHashMap<User, Boolean> userParticipation = new ConcurrentHashMap<>(); // 사용자 참여 상태 관리
 
     public ServerScheduleHandler(ObjectInputStream clientInput, ObjectOutputStream clientOutput, Map<String, ObjectOutputStream> onFeatureClients, User user, Schedule schedule) {
@@ -27,8 +27,8 @@ public class ServerScheduleHandler extends ServerFeatureHandler {
     public void run() {
         try {
             // 투표가 진행중인지 확인
-            sendResponse(isScheduling);
-            if (!isScheduling) return;
+            sendResponse(HostScheduleHandler.isScheduling());
+            if (!HostScheduleHandler.isScheduling()) return;
 
             // 사용자 참여 여부 확인
             sendResponse(userParticipation.containsKey(user));
@@ -108,13 +108,4 @@ public class ServerScheduleHandler extends ServerFeatureHandler {
         clientOutput.writeObject(new Packet<>(ClientState.SCHEDULE, message));
     }
 
-    public static synchronized void startScheduling() {
-        isScheduling = true;
-        System.out.println("[ServerScheduleHandler] Scheduling started.");
-    }
-
-    public static synchronized void stopScheduling() {
-        isScheduling = false;
-        System.out.println("[ServerScheduleHandler] Scheduling stopped.");
-    }
 }
