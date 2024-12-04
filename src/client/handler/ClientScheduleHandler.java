@@ -13,9 +13,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ClientScheduleHandler extends ClientFeatureHandler {
     private final User user;
@@ -40,7 +41,7 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
     }
 
     private void handleHostGUI() throws IOException, ClassNotFoundException {
-        JFrame frame = new JFrame("Host Schedule Menu");
+        JFrame frame = new JFrame("[Host] 일정 조율 메뉴");
         frame.setSize(400, 300);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -54,6 +55,7 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
         setDateRangeButton.addActionListener(e -> {
             try {
                 serverOutput.writeObject(new Packet<HostSchedulingAction>(ClientState.SCHEDULE, HostSchedulingAction.START));
+                frame.setVisible(false);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -62,16 +64,20 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
 
         endElectionButton.addActionListener(e -> {
             try {
-                serverOutput.writeObject(new Packet<>(ClientState.SCHEDULE, HostSchedulingAction.END));
-                JOptionPane.showMessageDialog(frame, "Election has been ended.", "End Election", JOptionPane.INFORMATION_MESSAGE);
+                serverOutput.writeObject(new Packet<HostSchedulingAction>(ClientState.SCHEDULE, HostSchedulingAction.END));
+                frame.setVisible(false);
+                getScheduleResult();
             } catch (IOException ex) {
                 ex.printStackTrace();
+            } catch (ClassNotFoundException ex) {
+                throw new RuntimeException(ex);
             }
         });
 
         enterDatesButton.addActionListener(e -> {
             try {
                 serverOutput.writeObject(new Packet<HostSchedulingAction>(ClientState.SCHEDULE, HostSchedulingAction.ADD_AVAILABLE_DATE));
+                frame.setVisible(false);
                 handleEnterAvailableDates();
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -89,6 +95,10 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
     }
 
     private void setDateRangeGUI(JFrame parentFrame) {
+        if (scheduleName != null && startDate != null && endDate != null) {
+            JOptionPane.showMessageDialog(parentFrame, scheduleName + " - Schedule coordination is not over yet.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
         JDialog dialog = new JDialog(parentFrame, "일정 설정", true);
         dialog.setSize(400, 300);
         dialog.setLayout(new GridLayout(4, 1, 10, 10)); // 4개의 행으로 레이아웃 조정
@@ -166,23 +176,23 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
             getScheduleInfo();
         }
         if (scheduleName == null || startDate == null || endDate == null) {
-            // TODO: 오류 메시지 팝업
-            writer.println("Schedule Info error");
             return;
         }
         enterAvailableDatesGUI();
     }
 
     private boolean isDateInputAvailable() throws IOException, ClassNotFoundException {
+        JFrame frame = new JFrame("조율 실패");
         // 투표가 진행중인지 확인
         if(!isScheduling()) {
-            // TODO: 오류 메시지 팝업
+            JOptionPane.showMessageDialog(frame, "Vote had not started.", "Error", JOptionPane.ERROR_MESSAGE);
             writer.println("Vote had not started");
             return false;
         }
 
         // 사용자 참여 여부 확인
         if(hasAlreadyVoted()) {
+            JOptionPane.showMessageDialog(frame, "You can't vote again.", "Error", JOptionPane.ERROR_MESSAGE);
             writer.println("You can't vote again");
             return false;
         }
@@ -191,23 +201,43 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
     }
 
     private void getScheduleInfo() throws IOException, ClassNotFoundException {
+        scheduleName = null;
+        startDate = null;
+        endDate = null;
+
         // 1. 서버로부터 스케줄 정보 요청
         writer.println("Retrieving schedule details from host...");
         Packet<String> requestScheduleInfo = new Packet<>(ClientState.SCHEDULE, "REQUEST_SCHEDULE_INFO");
         serverOutput.writeObject(requestScheduleInfo);
-        serverOutput.flush();
 
         // 2. 서버로부터 스케줄 정보 수신
-        Packet<Schedule> responsePacket = (Packet<Schedule>) serverInput.readObject();
-        Schedule scheduleInfo = responsePacket.body();
+        Packet<String> responsePacket = (Packet<String>) serverInput.readObject();
+        String scheduleInfo = responsePacket.body();
 
-        scheduleName = scheduleInfo.getScheduleName();
-        startDate = scheduleInfo.getStartDate();
-        endDate = scheduleInfo.getEndDate();
+        // 정규식 패턴 정의
+        String regex = "Schedule Name: (.+?)\\nStart Date: (\\d{4}-\\d{2}-\\d{2})\\nEnd Date: (\\d{4}-\\d{2}-\\d{2})\\n";
+
+        // Pattern과 Matcher 사용
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(scheduleInfo);
+
+        // 값 추출
+        if (matcher.find()) {
+            scheduleName = matcher.group(1); // Schedule Name
+            startDate = LocalDate.parse(matcher.group(2));   // Start Date
+            endDate = LocalDate.parse(matcher.group(3));     // End Date
+
+            // 출력
+            System.out.println("Schedule Name: " + scheduleName);
+            System.out.println("Start Date: " + startDate);
+            System.out.println("End Date: " + endDate);
+        } else {
+            System.out.println("No match found!");
+        }
     }
 
     private void enterAvailableDatesGUI() {
-        JFrame frame = new JFrame("Enter Available Dates");
+        JFrame frame = new JFrame("[" + scheduleName + "] 가능 일정 입력");
         frame.setSize(500, 600);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -218,7 +248,7 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
 
         // 연도와 월 표시
         JLabel monthLabel = new JLabel(
-                String.format("%s %d", startDate.getMonth(), startDate.getYear()),
+                String.format("%s: %s %d", scheduleName, startDate.getMonth(), startDate.getYear()),
                 JLabel.CENTER
         );
         monthLabel.setFont(new Font("Arial", Font.BOLD, 18));
@@ -288,7 +318,8 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
             } else {
                 try {
                     // 3. 서버에 가능 날짜 정보 전송
-                    serverOutput.writeObject(new Packet<>(ClientState.SCHEDULE, String.join(", ", selectedDates)));
+                    String availableDates = String.join(", ", selectedDates);
+                    serverOutput.writeObject(new Packet<String>(ClientState.SCHEDULE, availableDates));
                     serverOutput.flush();
                     frame.dispose();
                 } catch (IOException ex) {
@@ -301,7 +332,6 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
         frame.add(mainPanel);
         frame.setVisible(true);
     }
-
 
     // 날짜 선택을 위한 헬퍼 메서드
     private LocalDate selectDate(String title) {
@@ -325,6 +355,14 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
         return null;
     }
 
+    private void getScheduleResult() throws IOException, ClassNotFoundException {
+        JFrame frame = new JFrame("조율 결과");
+        Packet<String> responsePacket = (Packet<String>) serverInput.readObject();
+        String scheduleResult = responsePacket.body();
+
+        JOptionPane.showMessageDialog(frame, scheduleResult, "End Election", JOptionPane.INFORMATION_MESSAGE);
+    }
+
     private boolean isScheduling() throws IOException, ClassNotFoundException {
         Boolean isScheduling = false;
 
@@ -341,14 +379,5 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
         hasAlreadyVoted = packet.body();
 
         return hasAlreadyVoted;
-    }
-
-    private LocalDate parseDate(String date) {
-        try {
-            return LocalDate.parse(date);
-        } catch (DateTimeParseException e) {
-            System.out.println("Invalid date format: " + date);
-            return null;
-        }
     }
 }

@@ -58,8 +58,9 @@ public class HostScheduleHandler extends ServerScheduleHandler implements Serial
 
     private void makeDateRange() throws IOException, ClassNotFoundException {
         // 일정 이름과 기간 설정
-        Packet<Schedule> requsetPacket = (Packet<Schedule>) clientInput.readObject();
-        Schedule newSchedule = requsetPacket.body();
+        Packet<Schedule> requestPacket = (Packet<Schedule>) clientInput.readObject();
+        System.out.println("[Host] requestPacket" + requestPacket);
+        Schedule newSchedule = requestPacket.body();
 
         synchronized (schedule) {
             schedule.setScheduleName(newSchedule.getScheduleName());
@@ -69,21 +70,12 @@ public class HostScheduleHandler extends ServerScheduleHandler implements Serial
 
         // 사용자들에게 스케줄 조율 시작 알림
         String notification = schedule.toString();
-        synchronized (Objects.requireNonNull(onFeatureClients)) {
-            for (ObjectOutputStream client : onFeatureClients.values()) {
-                try {
-                    client.writeObject(notification);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        sendToAllClients(notification);
     }
 
     private void processResults() throws IOException {
         synchronized (schedule) {
             if (!schedule.hasInitialDates()) {
-                // TODO: Client 에서 패킷 받는 로직 추가
                 sendToAllClients("Voting has not started yet.");
                 return;
             }
@@ -110,17 +102,21 @@ public class HostScheduleHandler extends ServerScheduleHandler implements Serial
 
             // 모든 클라이언트에게 결과 전송
             // TODO: 결과 전송 수신할 위치 지정
-            sendToAllClients(result);
+//            sendToAllClients(result);
+            clientOutput.writeObject(new Packet<>(ClientState.SCHEDULE, result));
         }
     }
 
     private void sendToAllClients(String message) {
-        assert onFeatureClients != null;
-        for (ObjectOutputStream client : onFeatureClients.values()) {
-            try {
-                client.writeObject(new Packet<>(ClientState.SCHEDULE, message));
-            } catch (IOException e) {
-                e.printStackTrace();
+        synchronized (Objects.requireNonNull(onFeatureClients)) {
+            for (ObjectOutputStream client : onFeatureClients.values()) {
+                try {
+                    System.out.println("[HostScheduleHandler] Sending to client: " + message);
+                    client.writeObject(new Packet<>(ClientState.SCHEDULE, message));
+                    client.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

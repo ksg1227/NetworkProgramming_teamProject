@@ -64,7 +64,9 @@ public class ServerScheduleHandler extends ServerFeatureHandler {
 
     private void sendScheduleInfo() throws IOException {
         synchronized (schedule) {
-            clientOutput.writeObject(new Packet<Schedule>(ClientState.SCHEDULE, schedule));
+            System.out.println("[Server] Schedule" + schedule.getScheduleName() + ", " + schedule.getStartDate() + "-" + schedule.getEndDate());
+            String scheduleInfo = schedule.toString();
+            clientOutput.writeObject(new Packet<String>(ClientState.SCHEDULE, scheduleInfo));
         }
     }
 
