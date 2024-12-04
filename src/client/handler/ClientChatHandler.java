@@ -23,7 +23,7 @@ public class ClientChatHandler extends ClientFeatureHandler {
     public ClientChatHandler(BufferedReader chatReader, PrintWriter chatWriter, User client) {
         super(chatReader, chatWriter);
         this.client = client;
-        initializeGUI();
+        SwingUtilities.invokeLater(() -> initializeGUI());
     }
 
     private void initializeGUI() {
@@ -109,44 +109,35 @@ public class ClientChatHandler extends ClientFeatureHandler {
 
     @Override
     public void run() {
-        chatArea.append("채팅방에 입장하였습니다. (/q를 입력하여 퇴장)\n");
-        Thread receiverThread = createReceiverThread();
-
-        try {
-            while (running) {
-                // 메시지 입력 처리는 GUI 이벤트 리스너에서 수행
-            }
-        } finally {
-            running = false;
-            try {
-                receiverThread.join();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        SwingUtilities.invokeLater(() -> {
+            chatArea.append("채팅방에 입장하였습니다.\n");
+            Thread receiverThread = createReceiverThread();
+        });
     }
 
     // 수신 스레드 생성
     private Thread createReceiverThread() {
-        Thread receiverThread = new Thread(() -> {
-            try {
-                while (running) {
-                    if (chatReader.ready()) {
-                        String receivedMessage = chatReader.readLine();
-                        if (receivedMessage != null) {
-                            appendMessageToChatArea(receivedMessage);
-                        }
-                    }
-                    Thread.sleep(10);
-                }
-            } catch (Exception e) {
-                if (running) {
-                    appendMessageToChatArea("메시지 수신 중 오류가 발생했습니다: " + e.getMessage());
-                }
-            }
-        });
+        Thread receiverThread = new Thread(this::receiveMessage);
         receiverThread.start();
         return receiverThread;
+    }
+
+    private void receiveMessage() {
+        try {
+            while (running) {
+                if (chatReader.ready()) {
+                    String receivedMessage = chatReader.readLine();
+                    if (receivedMessage != null) {
+                        appendMessageToChatArea(receivedMessage);
+                    }
+                }
+                Thread.sleep(10);
+            }
+        } catch (Exception e) {
+            if (running) {
+                appendMessageToChatArea("메시지 수신 중 오류가 발생했습니다: " + e.getMessage());
+            }
+        }
     }
 
     private void appendMessageToChatArea(String message) {

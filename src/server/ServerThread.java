@@ -81,38 +81,39 @@ public class ServerThread extends Thread {
                     break;
                 }
 
-            assert packet != null;
-            assert packet.body().equals(EMPTY_BODY);
+                assert packet != null;
+                assert packet.body().equals(EMPTY_BODY);
 
-            switch (packet.clientState()) {
-                case HOME -> {
-                    System.out.println("home");
-                }
-                case CHATTING -> {
-                    new ServerChatHandler(chatReader,chatWriter,onChatClients,user).run();
-                }
-                case SCHEDULE -> {
-                    System.out.println("schedule");
-                }
-                case STATISTIC -> {
-                    System.out.println("statistic");
-                }
-                case PLACE_VOTE -> {
-                    onVoteClients.put(user.getUserName(), clientOutput);
-                    if(user.isHost()) {
-                        new HostVoteHandler(clientInput, clientOutput, onVoteClients, user).run();
-                    } else {
-                        new ServerVoteHandler(clientInput, clientOutput, onVoteClients, user).run();
+                switch (packet.clientState()) {
+                    case HOME -> {
+                        System.out.println("home");
                     }
-                    onVoteClients.remove(user.getUserName());
-                }
-                case PLACE_SUGGESTION -> {
-                    onPlaceSuggestClients.put(user.getUserName(), clientOutput);
-                    new ServerPlaceSuggestHandler(clientInput, clientOutput, onPlaceSuggestClients).run();
-                    onPlaceSuggestClients.remove(user.getUserName());
-                }
-                case null, default -> {
-                    System.out.println("nothing");
+                    case CHATTING -> {
+                        new ServerChatHandler(chatReader, chatWriter, onChatClients, user).run();
+                    }
+                    case SCHEDULE -> {
+                        System.out.println("schedule");
+                    }
+                    case STATISTIC -> {
+                        System.out.println("statistic");
+                    }
+                    case PLACE_VOTE -> {
+                        onVoteClients.put(user.getUserName(), clientOutput);
+                        if (user.isHost()) {
+                            new HostVoteHandler(clientInput, clientOutput, onVoteClients, user).run();
+                        } else {
+                            new ServerVoteHandler(clientInput, clientOutput, onVoteClients, user).run();
+                        }
+                        onVoteClients.remove(user.getUserName());
+                    }
+                    case PLACE_SUGGESTION -> {
+                        onPlaceSuggestClients.put(user.getUserName(), clientOutput);
+                        new ServerPlaceSuggestHandler(clientInput, clientOutput, onPlaceSuggestClients).run();
+                        onPlaceSuggestClients.remove(user.getUserName());
+                    }
+                    case null, default -> {
+                        System.out.println("nothing");
+                    }
                 }
             }
         } finally {
@@ -139,6 +140,12 @@ public class ServerThread extends Thread {
             }
             if (clientOutput != null) {
                 clientOutput.close();
+            }
+            if (chatReader != null) {
+                chatReader.close();
+            }
+            if (chatWriter != null) {
+                chatWriter.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
