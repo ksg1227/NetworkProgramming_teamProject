@@ -10,11 +10,12 @@ import server.handler.normal.ServerScheduleHandler;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Objects;
 
-public class HostScheduleHandler extends ServerScheduleHandler {
+public class HostScheduleHandler extends ServerScheduleHandler implements Serializable {
     private final Schedule schedule;
 
     public HostScheduleHandler(ObjectInputStream clientInput, ObjectOutputStream clientOutput, Map<String, ObjectOutputStream> onFeatureClients, User user, Schedule schedule) {
@@ -56,16 +57,13 @@ public class HostScheduleHandler extends ServerScheduleHandler {
 
     private void makeDateRange() throws IOException, ClassNotFoundException {
         // 일정 이름과 기간 설정
-        Packet<String> requestPacket = (Packet<String>) clientInput.readObject();
-        String[] scheduleInfo = requestPacket.body().split(",");
-        String name = scheduleInfo[0];
-        LocalDate startDate = LocalDate.parse(scheduleInfo[1]);
-        LocalDate endDate = LocalDate.parse(scheduleInfo[2]);
+        Packet<Schedule> requsetPacket = (Packet<Schedule>) clientInput.readObject();
+        Schedule newSchedule = requsetPacket.body();
 
         synchronized (schedule) {
-            schedule.setScheduleName(name);
-            schedule.setStartDate(startDate);
-            schedule.setEndDate(endDate);
+            schedule.setScheduleName(newSchedule.getScheduleName());
+            schedule.setStartDate(newSchedule.getStartDate());
+            schedule.setEndDate(newSchedule.getEndDate());
         }
 
         // 사용자들에게 스케줄 조율 시작 알림

@@ -1,17 +1,24 @@
 package entity;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class Schedule {
+public class Schedule implements Serializable {
     private LocalDate startDate;
     private LocalDate endDate;
     private String scheduleName;
     private final Map<LocalDate, Integer> dateAvailability = new HashMap<>();
 
     public Schedule() {}
+
+    public Schedule(String scheduleName, LocalDate startDate, LocalDate endDate) {
+        this.scheduleName = scheduleName;
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
 
     public synchronized void incrementAvailability(LocalDate date) {
         if (dateAvailability.containsKey(date)) {
@@ -81,5 +88,15 @@ public class Schedule {
 
     public boolean hasInitialDates() {
         return startDate != null && endDate != null;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Schedule Name: ").append(scheduleName).append("\n");
+        sb.append("Start Date: ").append(startDate).append("\n");
+        sb.append("End Date: ").append(endDate).append("\n");
+
+        return sb.toString();
     }
 }

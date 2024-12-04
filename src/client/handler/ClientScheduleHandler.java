@@ -3,11 +3,14 @@ package client.handler;
 import dto.ClientState;
 import dto.HostSchedulingAction;
 import dto.Packet;
+import entity.Schedule;
 import entity.User;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 public class ClientScheduleHandler extends ClientFeatureHandler {
     private final User user;
@@ -41,7 +44,10 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
                 return;
             case "1":
                 serverOutput.writeObject(new Packet<HostSchedulingAction>(ClientState.SCHEDULE, HostSchedulingAction.START));
-                setDateRange();
+                Schedule newSchedule = null;
+                while (newSchedule == null) {
+                    newSchedule = setDateRange();
+                }
                 writer.println("Start date coordination");
                 break;
             case "2":
@@ -56,18 +62,28 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
         }
     }
 
-    private void setDateRange() throws IOException {
+    private Schedule setDateRange() throws IOException {
         writer.println("Enter schedule name: ");
         String name = scanner.nextLine();
 
         writer.println("Enter start date (YYYY-MM-DD): ");
-        String startDate = scanner.nextLine();
+        String start = scanner.nextLine();
+        LocalDate startDate = parseDate(start);
 
         writer.println("Enter end date (YYYY-MM-DD): ");
-        String endDate = scanner.nextLine();
+        String end = scanner.nextLine();
+        LocalDate endDate = parseDate(end);
 
-        Packet<String> packet = new Packet<>(ClientState.SCHEDULE, name + "," + startDate + "," + endDate);
+        if (startDate == null || endDate == null || startDate.isAfter(endDate)) {
+            return null;
+        }
+
+        Schedule newSchedule = new Schedule(name, startDate, endDate);
+
+        Packet<Schedule> packet = new Packet<>(ClientState.SCHEDULE, newSchedule);
         serverOutput.writeObject(packet);
+
+        return newSchedule;
     }
 
     private void enterAvailableDates() throws IOException, ClassNotFoundException {
@@ -121,5 +137,14 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
         hasAlreadyVoted = packet.body();
 
         return hasAlreadyVoted;
+    }
+
+    private LocalDate parseDate(String date) {
+        try {
+            return LocalDate.parse(date);
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid date format: " + date);
+            return null;
+        }
     }
 }
