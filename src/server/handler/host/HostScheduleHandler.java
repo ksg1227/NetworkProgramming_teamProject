@@ -67,10 +67,7 @@ public class HostScheduleHandler extends ServerScheduleHandler implements Serial
         }
 
         // 사용자들에게 스케줄 조율 시작 알림
-        String notification = String.format("Name: %s, Start Date: %s, End Date: %s",
-                schedule.getScheduleName(),
-                schedule.getStartDate(),
-                schedule.getEndDate());
+        String notification = schedule.toString();
         synchronized (Objects.requireNonNull(onFeatureClients)) {
             for (ObjectOutputStream client : onFeatureClients.values()) {
                 try {
@@ -84,6 +81,12 @@ public class HostScheduleHandler extends ServerScheduleHandler implements Serial
 
     private void processResults() throws IOException {
         synchronized (schedule) {
+            if (!schedule.hasInitialDates()) {
+                // TODO: Client 에서 패킷 받는 로직 추가
+                sendToAllClients("Voting has not started yet.");
+                return;
+            }
+
             // 가장 높은 투표수를 가진 날짜 추출
             Map<LocalDate, Integer> maxValueAvailability = schedule.getMaxValueAvailability();
 
@@ -111,6 +114,7 @@ public class HostScheduleHandler extends ServerScheduleHandler implements Serial
     }
 
     private void sendToAllClients(String message) {
+        assert onFeatureClients != null;
         for (ObjectOutputStream client : onFeatureClients.values()) {
             try {
                 client.writeObject(new Packet<>(ClientState.SCHEDULE, message));
