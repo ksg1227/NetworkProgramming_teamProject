@@ -112,13 +112,16 @@ public class HostScheduleHandler extends ServerScheduleHandler implements Serial
 
     private void sendToAllClients(String message) {
         synchronized (Objects.requireNonNull(onFeatureClients)) {
-            for (ObjectOutputStream client : onFeatureClients.values()) {
-                try {
-                    System.out.println("[HostScheduleHandler] Sending to client: " + message);
-                    client.writeObject(new Packet<>(ClientState.SCHEDULE, message));
-                    client.flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
+            for (Object client : onFeatureClients.values()) {
+                if (client instanceof ObjectOutputStream) {
+                    ObjectOutputStream outputStream = (ObjectOutputStream) client;
+                    try {
+                        System.out.println("[HostScheduleHandler] Sending to client: " + message);
+                        outputStream.writeObject(new Packet<>(ClientState.SCHEDULE, message));
+                        outputStream.flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
