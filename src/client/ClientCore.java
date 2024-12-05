@@ -1,5 +1,6 @@
 package client;
 
+import client.handler.ClientChatHandler;
 import client.handler.ClientPlaceSuggestHandler;
 import client.handler.ClientScheduleHandler;
 import client.handler.ClientVoteHandler;
@@ -17,7 +18,10 @@ public class ClientCore extends Thread {
     private ObjectOutputStream serverOutput;
     private ObjectInputStream serverInput;
     private User client;
-
+    private InputStream in;
+    private OutputStream out;
+    private BufferedReader chatReader;
+    private PrintWriter chatWriter;
     private static JFrame mainFrame;
     private JLabel welcomeLabel;
     private JLabel logoLabel;
@@ -130,7 +134,7 @@ public class ClientCore extends Thread {
     // 각 상태 처리 핸들러
     private void startChatHandler() {
         System.out.println("Chat");
-        // 여기서 new ClientChatHandler().run() 하시면 됩니다.
+        new ClientChatHandler(serverInput,serverOutput,chatReader,chatWriter,client).run();
     }
 
     private void startScheduleHandler() {
@@ -156,9 +160,14 @@ public class ClientCore extends Thread {
     public void initializeSocketConnection() {
         try {
             socket = new Socket("localhost", 10000);
-            serverOutput = new ObjectOutputStream(socket.getOutputStream());
+            in = socket.getInputStream();
+            out = socket.getOutputStream();
+            serverOutput = new ObjectOutputStream(out);
             serverOutput.flush();
-            serverInput = new ObjectInputStream(socket.getInputStream());
+            serverInput = new ObjectInputStream(in);
+            chatReader = new BufferedReader(new InputStreamReader(in));
+            chatWriter = new PrintWriter(out, true);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -184,6 +193,10 @@ public class ClientCore extends Thread {
     private void exitApplication() {
         mainFrame.dispose();
         try {
+            if (out != null) out.close();
+            if (in != null) in.close();
+            if (chatWriter != null) chatWriter.close();
+            if (chatReader != null) chatReader.close();
             if (serverOutput != null) serverOutput.close();
             if (serverInput != null) serverInput.close();
             if (socket != null) socket.close();

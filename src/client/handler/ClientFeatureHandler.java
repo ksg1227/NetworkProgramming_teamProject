@@ -1,7 +1,5 @@
 package client.handler;
 
-import dto.Packet;
-
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
@@ -12,7 +10,6 @@ public abstract class ClientFeatureHandler {
     protected final PrintWriter writer = new PrintWriter(System.out, true);
     protected final ObjectInputStream serverInput;
     protected final ObjectOutputStream serverOutput;
-
     public ClientFeatureHandler(ObjectInputStream serverInput, ObjectOutputStream serverOutput) {
         this.serverInput = serverInput;
         this.serverOutput = serverOutput;
