@@ -15,6 +15,7 @@ public class ServerChatHandler extends ServerFeatureHandler {
     protected final User client;
     private static final int MAX_RECENT_CHAT = 10;
     private static final Deque<String> recentChats = new LinkedList<>();
+    private final String exitMessage = "UserQuitFromChattingRoom";
 
     public ServerChatHandler(BufferedReader chatReader, PrintWriter chatWriter, Map<String, PrintWriter> onFeatureClients, User client)
     {
@@ -75,7 +76,7 @@ public class ServerChatHandler extends ServerFeatureHandler {
 
             String message;
             while ((message = chatReader.readLine()) != null) {
-                if (message.equalsIgnoreCase("/q")) {
+                if (message.equalsIgnoreCase(exitMessage)) {
                     synchronized (onChatClients) {
                         onChatClients.remove(client.getUserName());
                     }

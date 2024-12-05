@@ -10,7 +10,7 @@ import java.io.PrintWriter;
 public class ClientChatHandler extends ClientFeatureHandler {
     private static final int FRAME_WIDTH = 400;
     private static final int FRAME_HEIGHT = 500;
-
+    private final String exitMessage = "UserQuitFromChattingRoom";
     private final User client;
     private volatile boolean running = true; // 스레드 실행 상태 플래그
 
@@ -91,7 +91,7 @@ public class ClientChatHandler extends ClientFeatureHandler {
 
     private void exitChat() {
         if (running) {
-            chatWriter.println("/q");
+            chatWriter.println(exitMessage);
             chatWriter.flush();
             running = false;
         }
