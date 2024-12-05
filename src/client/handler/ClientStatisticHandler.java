@@ -2,6 +2,7 @@ package client.handler;
 
 import dto.Packet;
 import dto.Statistic;
+import dto.StatisticResponse;
 import dto.VoteStatistic;
 
 import javax.swing.*;
@@ -24,17 +25,39 @@ public class ClientStatisticHandler extends ClientFeatureHandler {
     @Override
     public void run() {
         try {
-            Statistic statistic = (Statistic) serverInput.readObject();
-            VoteStatistic voteStatistic = statistic.voteStatistic();
+            // 서버에서 응답 수신
+            Object response = serverInput.readObject();
 
-            String scheduleName = statistic.name();
-            Map<LocalDate, Integer> votedDates = statistic.dates();
-            String place = voteStatistic.place();
+            // 응답을 분기 처리
+            if (response instanceof Statistic) {
+                Statistic statistic = (Statistic) response;
+                VoteStatistic voteStatistic = statistic.voteStatistic();
 
-            // Swing UI 구성
-            SwingUtilities.invokeLater(() -> createAndShowGUI(scheduleName, votedDates, place));
+                String scheduleName = statistic.name();
+                Map<LocalDate, Integer> votedDates = statistic.dates();
+                String place = voteStatistic.place();
+
+                // Swing UI 구성
+                SwingUtilities.invokeLater(() -> createAndShowGUI(scheduleName, votedDates, place));
+            } else if (response instanceof StatisticResponse) {
+                handleStatisticResponse((StatisticResponse) response);
+            } else {
+                throw new IllegalArgumentException("Unrecognized response type from server: " + response.getClass());
+            }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * StatisticResponse 처리
+     */
+    private void handleStatisticResponse(StatisticResponse response) {
+        switch (response) {
+            case NO_SCHEDULE -> JOptionPane.showMessageDialog(null, "일정이 정해지지 않았습니다.", "Error", JOptionPane.ERROR_MESSAGE);
+            case NO_SUGGESTED_PLACE -> JOptionPane.showMessageDialog(null, "장소가 정해지지 않았습니다.", "Error", JOptionPane.ERROR_MESSAGE);
+            default -> JOptionPane.showMessageDialog(null, "알 수 없는 응답입니다.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
