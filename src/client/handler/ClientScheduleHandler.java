@@ -93,6 +93,18 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
         panel.add(endElectionButton);
         panel.add(enterDatesButton);
 
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                try {
+                    serverOutput.writeObject(new Packet<HostSchedulingAction>(ClientState.SCHEDULE, HostSchedulingAction.END));
+                    frame.setVisible(false);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
         frame.add(panel);
         frame.setVisible(true);
     }
