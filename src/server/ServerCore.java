@@ -1,5 +1,7 @@
 package server;
 
+import entity.Schedule;
+
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
@@ -17,12 +19,18 @@ public class ServerCore extends Thread {
     private static ServerSocket serverSocket = null;
     private final PrintWriter writer = new PrintWriter(System.out, true);
 
+    private static final Schedule globalSchedule = new Schedule();
+
     public ServerCore() {
         try {
             serverSocket = new ServerSocket(10000);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static Schedule getGlobalSchedule() {
+        return globalSchedule; // 공유된 globalSchedule 반환
     }
 
     @Override
