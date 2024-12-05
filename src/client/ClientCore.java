@@ -2,6 +2,7 @@ package client;
 
 import client.handler.ClientChatHandler;
 import client.handler.ClientPlaceSuggestHandler;
+import client.handler.ClientScheduleHandler;
 import client.handler.ClientVoteHandler;
 import dto.ClientState;
 import dto.Packet;
@@ -137,8 +138,7 @@ public class ClientCore extends Thread {
     }
 
     private void startScheduleHandler() {
-        System.out.println("Schedule");
-        // 여기서 new ClientScheduleHandler().run() 하시면 됩니다.
+        new ClientScheduleHandler(serverInput, serverOutput, client).run();
     }
 
     private void startStatisticsHandler() {
