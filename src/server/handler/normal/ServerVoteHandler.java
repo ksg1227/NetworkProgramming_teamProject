@@ -2,11 +2,13 @@ package server.handler.normal;
 
 import dto.ClientState;
 import dto.Packet;
+import dto.VoteStatistic;
 import entity.User;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +17,8 @@ public class ServerVoteHandler extends ServerFeatureHandler {
     protected final User user;
     protected static final ConcurrentHashMap<User, String> votes = new ConcurrentHashMap<>();
     protected static Boolean isVoting = false;
-    private final HashSet<String> places = ServerPlaceSuggestHandler.getPlaces();;
+    private final HashSet<String> places = ServerPlaceSuggestHandler.getPlaces();
+    private static final HashMap<String, Integer> voteStatistic = new HashMap<>();
 
     public ServerVoteHandler(ObjectInputStream clientInput, ObjectOutputStream clientOutput, Map<String, ObjectOutputStream> onFeatureClients, User user) {
         super(clientInput, clientOutput, onFeatureClients);
@@ -59,6 +62,11 @@ public class ServerVoteHandler extends ServerFeatureHandler {
             }
         }
         votes.put(user, place);
+        if(voteStatistic.containsKey(place)) {
+            voteStatistic.put(place, voteStatistic.get(place) + 1);
+        } else {
+            voteStatistic.put(place, 1);
+        }
 
         // 5. 투표 결과 처리
         sendResponse("You've voted to " + place);
@@ -66,5 +74,19 @@ public class ServerVoteHandler extends ServerFeatureHandler {
 
     private void sendResponse(Object body) throws IOException {
         clientOutput.writeObject(new Packet<>(ClientState.PLACE_VOTE, body));
+    }
+
+    public static VoteStatistic getResult() {
+        String maxPlace = "";
+        Integer maxCount = 0;
+
+        for (Map.Entry<String, Integer> entry : voteStatistic.entrySet()) {
+            if (entry.getValue() > maxCount) {
+                maxPlace = entry.getKey();
+                maxCount = entry.getValue();
+            }
+        }
+
+        return new VoteStatistic(maxPlace, maxCount);
     }
 }
