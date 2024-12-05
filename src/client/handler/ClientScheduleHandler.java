@@ -13,6 +13,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -185,15 +186,15 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
         JFrame frame = new JFrame("조율 실패");
         // 투표가 진행중인지 확인
         if(!isScheduling()) {
-            JOptionPane.showMessageDialog(frame, "Vote had not started.", "Error", JOptionPane.ERROR_MESSAGE);
-            writer.println("Vote had not started");
+            JOptionPane.showMessageDialog(frame, "Coordination had not started.", "Error", JOptionPane.ERROR_MESSAGE);
+            writer.println("Schedule coordination had not started");
             return false;
         }
 
         // 사용자 참여 여부 확인
         if(hasAlreadyVoted()) {
-            JOptionPane.showMessageDialog(frame, "You can't vote again.", "Error", JOptionPane.ERROR_MESSAGE);
-            writer.println("You can't vote again");
+            JOptionPane.showMessageDialog(frame, "You can't enter again.", "Error", JOptionPane.ERROR_MESSAGE);
+            writer.println("You can't enter again");
             return false;
         }
 
@@ -348,6 +349,10 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
             LocalDate selectedDate = LocalDate.parse(editor.getFormat().format(dateSpinner.getValue()));
             if (minDate != null && selectedDate.isBefore(minDate)) {
                 JOptionPane.showMessageDialog(null, "End date must be after start date.", "Error", JOptionPane.ERROR_MESSAGE);
+                return null;
+            }
+            if (minDate != null && ChronoUnit.DAYS.between(minDate, selectedDate) > 30) {
+                JOptionPane.showMessageDialog(null, "The selected date must not exceed 30 days from the start date.", "Error", JOptionPane.ERROR_MESSAGE);
                 return null;
             }
             return selectedDate;
