@@ -378,7 +378,7 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
         Packet<String> responsePacket = (Packet<String>) serverInput.readObject();
         String scheduleResult = responsePacket.body();
 
-        JOptionPane.showMessageDialog(frame, scheduleResult, "End Election", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(frame, scheduleResult, "End Coordination", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private boolean isScheduling() throws IOException, ClassNotFoundException {

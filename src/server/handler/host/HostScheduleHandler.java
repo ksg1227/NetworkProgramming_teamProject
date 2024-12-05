@@ -76,7 +76,8 @@ public class HostScheduleHandler extends ServerScheduleHandler implements Serial
     private void processResults() throws IOException {
         synchronized (schedule) {
             if (!schedule.hasInitialDates()) {
-                sendToAllClients("Voting has not started yet.");
+                String result = "Scheduling has not started yet.";
+                clientOutput.writeObject(new Packet<>(ClientState.SCHEDULE, result));
                 return;
             }
 
@@ -84,7 +85,8 @@ public class HostScheduleHandler extends ServerScheduleHandler implements Serial
             Map<LocalDate, Integer> maxValueAvailability = schedule.getMaxValueAvailability();
 
             if (maxValueAvailability.isEmpty()) {
-                sendToAllClients("No votes received. Scheduling failed.");
+                String result = "No dates received. Scheduling failed.";
+                clientOutput.writeObject(new Packet<>(ClientState.SCHEDULE, result));
                 return;
             }
 
@@ -102,7 +104,6 @@ public class HostScheduleHandler extends ServerScheduleHandler implements Serial
 
             // 모든 클라이언트에게 결과 전송
             // TODO: 결과 전송 수신할 위치 지정
-//            sendToAllClients(result);
             clientOutput.writeObject(new Packet<>(ClientState.SCHEDULE, result));
         }
     }
