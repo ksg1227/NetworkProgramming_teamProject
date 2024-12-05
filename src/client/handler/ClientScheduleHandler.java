@@ -148,28 +148,39 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
             }
         });
 
-        // Confirm 버튼 동작
-        confirmButton.addActionListener(e -> {
+        Runnable handleConfirm = () -> {
             String scheduleName = scheduleNameField.getText().trim();
+
+            Schedule schedule = null;
             if (scheduleName.isEmpty() || startDate == null || endDate == null) {
                 JOptionPane.showMessageDialog(dialog, "Please fill out all fields.", "Error", JOptionPane.ERROR_MESSAGE);
             } else {
-                try {
-                    Schedule schedule = new Schedule(scheduleName, startDate, endDate);
-                    serverOutput.writeObject(new Packet<>(ClientState.SCHEDULE, schedule));
-                    serverOutput.flush();
-                    dialog.dispose();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                schedule = new Schedule(scheduleName, startDate, endDate);
             }
-        });
+            try {
+                serverOutput.writeObject(new Packet<>(ClientState.SCHEDULE, schedule));
+                serverOutput.flush();
+                dialog.dispose();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        };
+
+        // Confirm 버튼 동작
+        confirmButton.addActionListener(e -> handleConfirm.run());
 
         // 구성 요소 추가
         dialog.add(namePanel);      // Schedule Name 입력창
         dialog.add(startPanel);     // Start Date 선택
         dialog.add(endPanel);       // End Date 선택
         dialog.add(confirmButton);  // Confirm 버튼
+
+        dialog.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                handleConfirm.run();
+            }
+        });
 
         dialog.setVisible(true);
     }

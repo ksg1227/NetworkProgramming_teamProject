@@ -59,8 +59,10 @@ public class HostScheduleHandler extends ServerScheduleHandler implements Serial
     private void makeDateRange() throws IOException, ClassNotFoundException {
         // 일정 이름과 기간 설정
         Packet<Schedule> requestPacket = (Packet<Schedule>) clientInput.readObject();
-        System.out.println("[Host] requestPacket" + requestPacket);
         Schedule newSchedule = requestPacket.body();
+        if (newSchedule == null) {
+            return;
+        }
 
         synchronized (schedule) {
             schedule.setScheduleName(newSchedule.getScheduleName());
