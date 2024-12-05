@@ -3,6 +3,7 @@ package server;
 import dto.Packet;
 import entity.User;
 import server.handler.host.HostVoteHandler;
+import server.handler.normal.ServerChatHandler;
 import server.handler.normal.ServerPlaceSuggestHandler;
 import server.handler.normal.ServerVoteHandler;
 
@@ -11,7 +12,7 @@ import java.net.Socket;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerThread extends Thread {
-    private static ConcurrentHashMap<String, ObjectOutputStream> onChatClients;
+    private static ConcurrentHashMap<String, PrintWriter> onChatClients;
     private static ConcurrentHashMap<String, ObjectOutputStream> onScheduleClients;
     private static ConcurrentHashMap<String, ObjectOutputStream> onStatisticClients;
     private static ConcurrentHashMap<String, ObjectOutputStream> onVoteClients;
@@ -19,14 +20,15 @@ public class ServerThread extends Thread {
 
     private final ObjectInputStream clientInput;
     private final ObjectOutputStream clientOutput;
-
+    private final BufferedReader chatReader;
+    private final PrintWriter chatWriter;
     private final PrintWriter writer = new PrintWriter(System.out, true);
 
     private final User user;
 
     public ServerThread(
             Socket socket,
-            ConcurrentHashMap<String, ObjectOutputStream> onChatClients,
+            ConcurrentHashMap<String, PrintWriter> onChatClients,
             ConcurrentHashMap<String, ObjectOutputStream> onScheduleClients,
             ConcurrentHashMap<String, ObjectOutputStream> onStatisticClients,
             ConcurrentHashMap<String, ObjectOutputStream> onVoteClients,
@@ -39,9 +41,13 @@ public class ServerThread extends Thread {
         ServerThread.onPlaceSuggestClients = onPlaceSuggestClients;
 
         try {
-            this.clientOutput = new ObjectOutputStream(socket.getOutputStream());
+            InputStream in = socket.getInputStream();
+            OutputStream out = socket.getOutputStream();
+            this.clientOutput = new ObjectOutputStream(out);
             clientOutput.flush();
-            this.clientInput = new ObjectInputStream(socket.getInputStream());
+            this.clientInput = new ObjectInputStream(in);
+            this.chatWriter = new PrintWriter(out, true);
+            this.chatReader = new BufferedReader(new InputStreamReader(in));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -75,22 +81,21 @@ public class ServerThread extends Thread {
                     break;
                 }
 
-                // TODO : 각각의 기능 구현 필요
                 assert packet != null;
                 assert packet.body().equals(EMPTY_BODY);
 
                 switch (packet.clientState()) {
                     case HOME -> {
-                        writer.println("home");
+                        System.out.println("home");
                     }
                     case CHATTING -> {
-                        writer.println("chat");
+                        new ServerChatHandler(chatReader, chatWriter, onChatClients, user).run();
                     }
                     case SCHEDULE -> {
-                        writer.println("schedule");
+                        System.out.println("schedule");
                     }
                     case STATISTIC -> {
-                        writer.println("statistic");
+                        System.out.println("statistic");
                     }
                     case PLACE_VOTE -> {
                         onVoteClients.put(user.getUserName(), clientOutput);
@@ -107,7 +112,7 @@ public class ServerThread extends Thread {
                         onPlaceSuggestClients.remove(user.getUserName());
                     }
                     case null, default -> {
-                        writer.println("nothing");
+                        System.out.println("nothing");
                     }
                 }
             }
@@ -135,6 +140,12 @@ public class ServerThread extends Thread {
             }
             if (clientOutput != null) {
                 clientOutput.close();
+            }
+            if (chatReader != null) {
+                chatReader.close();
+            }
+            if (chatWriter != null) {
+                chatWriter.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
