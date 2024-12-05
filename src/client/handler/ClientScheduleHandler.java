@@ -8,6 +8,8 @@ import entity.User;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -302,10 +304,7 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
 
         mainPanel.add(calendarPanel, BorderLayout.CENTER);
 
-        // 확인 버튼
-        JButton submitButton = new JButton("Submit");
-        submitButton.setFont(new Font("Arial", Font.BOLD, 16));
-        submitButton.addActionListener(e -> {
+        Runnable handleSubmit = () -> {
             List<String> selectedDates = new ArrayList<>();
             for (int i = 0; i < dateButtons.size(); i++) {
                 JButton button = dateButtons.get(i);
@@ -314,23 +313,37 @@ public class ClientScheduleHandler extends ClientFeatureHandler {
                 }
             }
 
+            String availableDates = null;
             if (selectedDates.isEmpty()) {
                 JOptionPane.showMessageDialog(frame, "No dates selected.", "Error", JOptionPane.ERROR_MESSAGE);
             } else {
-                try {
-                    // 3. 서버에 가능 날짜 정보 전송
-                    String availableDates = String.join(", ", selectedDates);
-                    serverOutput.writeObject(new Packet<String>(ClientState.SCHEDULE, availableDates));
-                    serverOutput.flush();
-                    frame.dispose();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                availableDates = String.join(", ", selectedDates);
             }
-        });
+            try {
+                // 3. 서버에 가능 날짜 정보 전송
+                serverOutput.writeObject(new Packet<String>(ClientState.SCHEDULE, availableDates));
+                serverOutput.flush();
+                frame.dispose();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        };
+
+        // 확인 버튼
+        JButton submitButton = new JButton("Submit");
+        submitButton.setFont(new Font("Arial", Font.BOLD, 16));
+        submitButton.addActionListener(e -> handleSubmit.run());
 
         mainPanel.add(submitButton, BorderLayout.SOUTH);
         frame.add(mainPanel);
+
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                handleSubmit.run();
+            }
+        });
+
         frame.setVisible(true);
     }
 

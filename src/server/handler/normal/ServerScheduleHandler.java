@@ -57,6 +57,9 @@ public class ServerScheduleHandler extends ServerFeatureHandler {
 
         // 3. 클라이언트로부터 가능 날짜 정보 수신
         Packet<String> datesPacket = (Packet<String>) clientInput.readObject();
+        if (datesPacket.body() == null) {
+            return;
+        }
         updateAvailability(datesPacket.body());
 
         userParticipation.put(user, true); // 참여 표시
