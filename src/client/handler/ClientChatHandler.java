@@ -5,6 +5,8 @@ import entity.User;
 import javax.swing.*;
 import java.awt.*;
 import java.io.BufferedReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 
 public class ClientChatHandler extends ClientFeatureHandler {
@@ -13,18 +15,23 @@ public class ClientChatHandler extends ClientFeatureHandler {
     private final String exitMessage = "UserQuitFromChattingRoom";
     private final User client;
     private volatile boolean running = true; // 스레드 실행 상태 플래그
-
+    private BufferedReader chatReader;
+    private PrintWriter chatWriter;
     private JFrame chatFrame;
     private JTextArea chatArea;
     private JTextField inputField;
     private JButton sendButton;
     private JButton exitButton;
 
-    public ClientChatHandler(BufferedReader chatReader, PrintWriter chatWriter, User client) {
-        super(chatReader, chatWriter);
+    public ClientChatHandler(ObjectInputStream serverInput, ObjectOutputStream serverOutput, BufferedReader chatReader, PrintWriter chatWriter, User client) {
+        super(serverInput, serverOutput);
+        this.chatReader = chatReader;
+        this.chatWriter = chatWriter;
         this.client = client;
         SwingUtilities.invokeLater(() -> initializeGUI());
     }
+
+
 
     private void initializeGUI() {
         chatFrame = createChatFrame();

@@ -133,7 +133,7 @@ public class ClientCore extends Thread {
     // 각 상태 처리 핸들러
     private void startChatHandler() {
         System.out.println("Chat");
-        new ClientChatHandler(chatReader,chatWriter,client).run();
+        new ClientChatHandler(serverInput,serverOutput,chatReader,chatWriter,client).run();
     }
 
     private void startScheduleHandler() {
