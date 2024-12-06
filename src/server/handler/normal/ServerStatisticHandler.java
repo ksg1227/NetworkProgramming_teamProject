@@ -22,7 +22,7 @@ public class ServerStatisticHandler extends ServerFeatureHandler {
         VoteStatistic voteStatistic = ServerVoteHandler.getResult();
 
         if (schedule.getScheduleName() == null) {
-            sendResponse(clientOutput, NO_SCHEDULE);
+            sendResponse(NO_SCHEDULE);
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -32,7 +32,7 @@ public class ServerStatisticHandler extends ServerFeatureHandler {
         }
 
         if (voteStatistic.place().isEmpty()) {
-            sendResponse(clientOutput, NO_SUGGESTED_PLACE);
+            sendResponse(NO_SUGGESTED_PLACE);
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -43,11 +43,11 @@ public class ServerStatisticHandler extends ServerFeatureHandler {
 
         // 정상적인 Statistic 응답 생성
         Statistic statistic = new Statistic(schedule.getScheduleName(), schedule.getMaxValueAvailability(), voteStatistic);
-        sendResponse(clientOutput, statistic);
+        sendResponse(statistic);
 
     }
 
-    private void sendResponse(ObjectOutputStream clientOutput, Object response) {
+    private void sendResponse(Object response) {
         try {
             clientOutput.writeObject(response);
             clientOutput.flush();
