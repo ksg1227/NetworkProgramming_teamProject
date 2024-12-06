@@ -1,9 +1,6 @@
 package client;
 
-import client.handler.ClientChatHandler;
-import client.handler.ClientPlaceSuggestHandler;
-import client.handler.ClientScheduleHandler;
-import client.handler.ClientVoteHandler;
+import client.handler.*;
 import dto.ClientState;
 import dto.Packet;
 import entity.User;
@@ -143,7 +140,7 @@ public class ClientCore extends Thread {
 
     private void startStatisticsHandler() {
         System.out.println("Statistics");
-        // 여기서 new ClientStatisticHandler().run()
+         new ClientStatisticHandler(serverInput, serverOutput).run();
     }
 
     private void startVoteHandler() {

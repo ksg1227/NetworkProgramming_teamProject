@@ -4,10 +4,7 @@ import dto.Packet;
 import entity.User;
 import server.handler.host.HostScheduleHandler;
 import server.handler.host.HostVoteHandler;
-import server.handler.normal.ServerChatHandler;
-import server.handler.normal.ServerPlaceSuggestHandler;
-import server.handler.normal.ServerScheduleHandler;
-import server.handler.normal.ServerVoteHandler;
+import server.handler.normal.*;
 
 import java.io.*;
 import java.net.Socket;
@@ -101,7 +98,7 @@ public class ServerThread extends Thread {
                         }
                     }
                     case STATISTIC -> {
-                        System.out.println("statistic");
+                        new ServerStatisticHandler(clientInput, clientOutput, onStatisticClients).run();
                     }
                     case PLACE_VOTE -> {
                         onVoteClients.put(user.getUserName(), clientOutput);
